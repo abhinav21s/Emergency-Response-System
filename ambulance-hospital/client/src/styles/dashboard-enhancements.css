@@ -1,0 +1,205 @@
+/* Dashboard-specific text visibility enhancements */
+
+/* Hospital Status Card */
+.hospital-status-card {
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+}
+
+.hospital-status-card .hospital-name {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #ffffff, #a5b4fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.hospital-status-card .hospital-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Stat Cards */
+.stat-card {
+  background: rgba(30, 41, 59, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  transition: all 0.3s ease;
+  height: 100%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.stat-card .stat-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: var(--primary);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+}
+
+.stat-card .stat-value {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.stat-card .stat-label {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Emergency Request Cards */
+.emergency-request-section {
+  margin-top: 2rem;
+}
+
+.emergency-request-section .section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.emergency-request-card {
+  background: rgba(30, 41, 59, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.emergency-request-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.emergency-request-card .request-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.emergency-request-card .request-details {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.emergency-request-card .request-meta {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Severity Badges */
+.badge-severity {
+  padding: 0.35rem 0.75rem;
+  border-radius: 2rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.badge-severity.high {
+  background: linear-gradient(135deg, #ef4444, #f87171);
+  color: white;
+}
+
+.badge-severity.medium {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: white;
+}
+
+.badge-severity.low {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  color: white;
+}
+
+/* Status Badges */
+.badge-status {
+  padding: 0.35rem 0.75rem;
+  border-radius: 2rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.badge-status.arrived {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  color: white;
+}
+
+.badge-status.pending {
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  color: white;
+}
+
+.badge-status.completed {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  color: white;
+}
+
+/* Action Buttons */
+.btn-action {
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-action.btn-view {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  border: none;
+  color: white;
+}
+
+.btn-action.btn-accept {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none;
+  color: white;
+}
+
+.btn-action.btn-reject {
+  background: linear-gradient(135deg, #ef4444, #f87171);
+  border: none;
+  color: white;
+}

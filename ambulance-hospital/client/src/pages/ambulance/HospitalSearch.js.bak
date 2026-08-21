@@ -1,0 +1,813 @@
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { Container, Row, Col, Card, Form, Button, Badge, Alert, Modal } from 'react-bootstrap';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import { FaUserMd, FaBed, FaHospital, FaAmbulance, FaFilter, FaSync } from 'react-icons/fa';
+import axios from 'axios';
+import { AuthContext } from '../../context/AuthContext';
+import { SocketContext } from '../../context/SocketContext';
+import api, { API_CONFIG } from '../../utils/axiosConfig';
+import Loader from '../../components/common/Loader';
+import AmbulanceNavbar from '../../components/ambulance/AmbulanceNavbar';
+
+// Import Leaflet CSS directly
+import 'leaflet/dist/leaflet.css';
+
+// Import text visibility enhancements
+import '../../styles/hospital-search-text-visibility.css';
+import '../../styles/hospital-details-text-visibility.css';
+
+// Fix Leaflet default icon issue
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+});
+
+// Define map styles directly in the component
+const mapStyles = `
+  .leaflet-container {
+    height: 450px !important;
+    width: 100% !important;
+    z-index: 1;
+  }
+  
+  .hospital-marker {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    color: white !important;
+    font-size: 1.2rem !important;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  .hospital-marker.accepting {
+    background: linear-gradient(135deg, #10b981, #34d399) !important;
+    border: 2px solid rgba(255, 255, 255, 0.7) !important;
+  }
+  
+  .hospital-marker.not-accepting {
+    background: linear-gradient(135deg, #ef4444, #f87171) !important;
+    border: 2px solid rgba(255, 255, 255, 0.7) !important;
+  }
+  
+  .ambulance-marker {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    color: white !important;
+    font-size: 1.2rem !important;
+    background: linear-gradient(135deg, #6366f1, #818cf8) !important;
+    border: 2px solid rgba(255, 255, 255, 0.7) !important;
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.6) !important;
+  }
+  
+  .leaflet-div-icon {
+    background: transparent !important;
+    border: none !important;
+  }
+`;
+
+// Custom component to update map view when location changes
+const ChangeMapView = ({ center }) => {
+  const map = useMap();
+  map.setView(center, map.getZoom());
+  return null;
+};
+
+// Custom hospital marker icon
+const createHospitalIcon = (isAccepting) => {
+  return L.divIcon({
+    className: `hospital-marker ${isAccepting ? 'accepting' : 'not-accepting'}`,
+    html: `<i class="fas fa-hospital"></i>`,
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+    popupAnchor: [0, -20],
+  });
+};
+
+// Custom ambulance marker icon
+const ambulanceIcon = L.divIcon({
+  className: 'ambulance-marker',
+  html: `<i class="fas fa-ambulance"></i>`,
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
+  popupAnchor: [0, -20],
+});
+
+const HospitalSearch = () => {
+  const { user } = useContext(AuthContext);
+  const { socket } = useContext(SocketContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const mapRef = useRef(null);
+
+  // Get selected hospital ID from URL query params
+  const queryParams = new URLSearchParams(location.search);
+  const selectedHospitalId = queryParams.get('selected');
+
+  const [ambulance, setAmbulance] = useState(null);
+  const [hospitals, setHospitals] = useState([]);
+  const [selectedHospital, setSelectedHospital] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [mapCenter, setMapCenter] = useState([20.5937, 78.9629]); // Default to center of India
+  const [searchParams, setSearchParams] = useState({
+    maxDistance: 10000, // 10km
+    emergencyType: '',
+    acceptingOnly: true
+  });
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Fetch ambulance data
+  useEffect(() => {
+    const fetchAmbulanceData = async () => {
+      try {
+        // Get authentication token
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('Authentication token missing. Please log in again.');
+          return;
+        }
+
+        // Make direct axios call with authentication token
+        const res = await axios.get(`${API_CONFIG.BASE_URL}/ambulances/${user._id}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (res.data && res.data.ambulance) {
+          setAmbulance(res.data.ambulance);
+          
+          // Set map center to ambulance location
+          if (res.data.ambulance.location && res.data.ambulance.location.coordinates) {
+            const [longitude, latitude] = res.data.ambulance.location.coordinates;
+            setMapCenter([latitude, longitude]);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching ambulance data:', error);
+        setError('Failed to load ambulance data. Please refresh and try again.');
+      }
+    };
+    
+    if (user) {
+      fetchAmbulanceData();
+    }
+  }, [user]);
+
+  // Fetch hospitals function (extracted for reuse)
+  const fetchHospitals = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      setSuccess('');
+      
+      console.log('Fetching hospitals with params:', searchParams);
+
+      // Ensure token is in localStorage before making the request
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication token missing. Please log in again.');
+        setLoading(false);
+        return;
+      }
+
+      // Make sure we're using the correct endpoint and headers
+      const res = await axios.get(`${API_CONFIG.BASE_URL}/ambulances/${user._id}/nearby-hospitals`, {
+        params: {
+          maxDistance: searchParams.maxDistance,
+          emergencyType: searchParams.emergencyType || undefined,
+          acceptingOnly: searchParams.acceptingOnly
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log('Hospitals response:', res.data);
+      
+      if (res.data && Array.isArray(res.data)) {
+        // Map the hospital data to include distance
+        const hospitalsWithDistance = res.data.map(hospital => {
+          let distance = 0;
+          
+          // Calculate distance if both ambulance and hospital have locations
+          if (ambulance && ambulance.location && hospital.location) {
+            const [hospitalLong, hospitalLat] = hospital.location.coordinates;
+            const [ambulanceLong, ambulanceLat] = ambulance.location.coordinates;
+            
+            distance = calculateDistance(
+              hospitalLat, hospitalLong,
+              ambulanceLat, ambulanceLong
+            );
+          }
+          
+          return {
+            ...hospital,
+            distance
+          };
+        });
+        
+        setHospitals(hospitalsWithDistance);
+        
+        // If there's a selected hospital ID in the URL, select that hospital
+        if (selectedHospitalId) {
+          const hospital = hospitalsWithDistance.find(h => h._id === selectedHospitalId);
+          if (hospital) {
+            selectHospital(hospital);
+          }
+        }
+        
+        console.log('Hospitals loaded:', hospitalsWithDistance.length);
+      } else {
+        setHospitals([]);
+        console.log('No hospitals found or invalid response format');
+      }
+    } catch (error) {
+      console.error('Error fetching hospitals:', error);
+      setError('Failed to fetch hospitals. Please try again.');
+      setHospitals([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch hospitals
+  useEffect(() => {
+    fetchHospitals();
+  }, [ambulance, user._id, searchParams, selectedHospitalId]);
+
+  // Listen for real-time updates
+  useEffect(() => {
+    if (!user) return;
+
+    // Listen for hospital updates
+    const cleanup = () => {
+      // Cleanup function
+    };
+
+    // Listen for doctor updates
+    const doctorCleanup = () => {
+      // Cleanup function
+    };
+
+    return () => {
+      cleanup();
+      doctorCleanup();
+    };
+  }, [user, ambulance]);
+
+  // Manual refresh function
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchHospitals();
+    } catch (error) {
+      console.error('Error refreshing hospitals:', error);
+      setError('Failed to refresh hospital data. Please try again.');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // Handle search form changes
+  const handleSearchChange = (e) => {
+    const { name, value, type, checked } = e.target;
+
+    setSearchParams({
+      ...searchParams,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+
+  // Select hospital
+  const selectHospital = (hospital) => {
+    setSelectedHospital(hospital);
+
+    // Update URL with selected hospital ID
+    const newParams = new URLSearchParams(location.search);
+    newParams.set('selected', hospital._id);
+    navigate(`${location.pathname}?${newParams.toString()}`);
+
+    // Center map on selected hospital
+    if (hospital.location?.coordinates) {
+      setMapCenter([
+        hospital.location.coordinates[1], 
+        hospital.location.coordinates[0]
+      ]);
+    }
+  };
+
+  // Send arrival notification directly
+  const sendArrivalNotification = async () => {
+    if (!selectedHospital) {
+      setError('Please select a hospital first');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setError('');
+
+      // Create emergency request data
+      const emergencyData = {
+        hospital: selectedHospital._id,
+        emergencyType: 'Ambulance Arrival',
+        severity: 'Medium',
+        status: 'Requested',
+        notes: `Ambulance ${user.name || 'Unknown'} is arriving`,
+        patient: {
+          condition: 'Ambulance arrival notification'
+        }
+      };
+
+      // Add location if available
+      if (ambulance?.location) {
+        emergencyData.location = ambulance.location;
+      }
+
+      console.log('Sending direct notification to hospital:', selectedHospital._id);
+
+      // Get authentication token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token missing. Please log in again.');
+      }
+
+      // Direct POST to the emergency endpoint with authentication
+      const response = await fetch(`${API_CONFIG.BASE_URL}/emergencies`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(emergencyData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to send notification');
+      }
+
+      const data = await response.json();
+      console.log('Emergency created successfully:', data);
+
+      // Show success message
+      setSuccess(`Arrival notification sent to ${selectedHospital.hospitalName || selectedHospital.name}`);
+
+      // Emit socket event if available
+      if (socket && socket.connected) {
+        socket.emit('ambulance:request', {
+          emergencyId: data._id,
+          hospitalId: selectedHospital._id,
+          ambulanceId: user._id,
+          ambulanceName: user.name || 'Unknown',
+          message: 'Ambulance arrival notification'
+        });
+        console.log('Socket event emitted');
+      }
+
+      // Navigate to dashboard after 2 seconds
+      setTimeout(() => {
+        navigate('/ambulance/dashboard');
+      }, 2000);
+    } catch (error) {
+      console.error('Error sending arrival notification:', error);
+      setError(`Failed to send notification: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Calculate distance between two coordinates in kilometers
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    // Handle missing coordinates
+    if (!lat1 || !lon1 || !lat2 || !lon2) {
+      console.log('Missing coordinates for distance calculation:', { lat1, lon1, lat2, lon2 });
+      return null; // Return null instead of 0 to indicate unknown distance
+    }
+
+    const R = 6371; // Radius of the earth in km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2); 
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    const d = R * c; // Distance in km
+    return d;
+  };
+
+  const deg2rad = (deg) => {
+    return deg * (Math.PI/180);
+  };
+
+  if (loading) {
+    return <Loader />;
+  }
+
+  return (
+    <Container className="hospital-search-container">
+      <AmbulanceNavbar />
+      {/* Inject map styles */}
+      <style>{mapStyles}</style>
+      
+      <h1 className="search-title">Find Hospitals</h1>
+      <p className="search-subtitle">
+        Search for nearby hospitals that accept emergency services
+        <Button 
+          variant="link" 
+          className="refresh-button ms-2" 
+          onClick={handleRefresh}
+          disabled={refreshing || loading}
+        >
+          <FaSync className={refreshing ? 'spin' : ''} />
+        </Button>
+      </p>
+
+      <Row>
+        <Col lg={4} md={12}>
+          <Card className="search-filters-card">
+            <Card.Header className="search-filters-header">
+              <h5><FaFilter className="me-2" /> Search Filters</h5>
+            </Card.Header>
+            <Card.Body className="search-filters-body">
+              <Form>
+                <Form.Group className="mb-3">
+                  <Form.Label className="filter-label">Distance</Form.Label>
+                  <Form.Select 
+                    className="filter-select"
+                    name="maxDistance"
+                    value={searchParams.maxDistance}
+                    onChange={handleSearchChange}
+                  >
+                    <option value="10000">10 km</option>
+                    <option value="5000">5 km</option>
+                    <option value="2000">2 km</option>
+                    <option value="1000">1 km</option>
+                  </Form.Select>
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label className="filter-label">Emergency Type</Form.Label>
+                  <Form.Select 
+                    className="filter-select"
+                    name="emergencyType"
+                    value={searchParams.emergencyType}
+                    onChange={handleSearchChange}
+                  >
+                    <option value="">All Types</option>
+                    <option value="Cardiac">Cardiac</option>
+                    <option value="Trauma">Trauma</option>
+                    <option value="General">General</option>
+                    <option value="Burn">Burn</option>
+                    <option value="Pediatric">Pediatric</option>
+                  </Form.Select>
+                </Form.Group>
+
+                <Form.Group className="filter-checkbox">
+                  <Form.Check 
+                    type="checkbox"
+                    id="acceptingOnly"
+                    label="Only show hospitals accepting emergencies"
+                    checked={searchParams.acceptingOnly}
+                    onChange={(e) => setSearchParams({
+                      ...searchParams,
+                      acceptingOnly: e.target.checked
+                    })}
+                  />
+                </Form.Group>
+              </Form>
+            </Card.Body>
+          </Card>
+
+          <Card className="hospital-list-card">
+            <Card.Header className="gradient-header">
+              <h5><FaHospital className="me-2" /> Nearby Hospitals</h5>
+            </Card.Header>
+            <Card.Body className="dark-card-body">
+              {error && <Alert variant="danger">{error}</Alert>}
+              {loading ? (
+                <Loader />
+              ) : hospitals.length > 0 ? (
+                hospitals.map(hospital => (
+                  <div 
+                    key={hospital._id} 
+                    className={`hospital-item ${selectedHospital && selectedHospital._id === hospital._id ? 'active' : ''}`}
+                    onClick={() => selectHospital(hospital)}
+                  >
+                    <h5>{hospital.hospitalName || hospital.name}</h5>
+                    <p className="hospital-address">
+                      {hospital.address?.street}, {hospital.address?.city}
+                    </p>
+                    <p className="hospital-distance">
+                      {hospital.distance !== null && hospital.distance !== undefined 
+                        ? `${hospital.distance.toFixed(1)} km away` 
+                        : 'Distance unknown'}
+                    </p>
+                    <div>
+                      <Badge 
+                        bg={hospital.isAcceptingEmergencies ? "success" : "danger"} 
+                        className="glow-badge-sm"
+                      >
+                        {hospital.isAcceptingEmergencies ? "Accepting" : "Not Accepting"}
+                      </Badge>
+                      {hospital.emergencyTypes?.slice(0, 3).map((type, index) => (
+                        <Badge 
+                          key={index} 
+                          bg="secondary" 
+                          className="me-1 mb-1 glow-badge-sm"
+                        >
+                          {type}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-light">No hospitals found</p>
+              )}
+            </Card.Body>
+          </Card>
+        </Col>
+
+        <Col lg={8} md={12}>
+          <Card className="map-card">
+            <Card.Header className="gradient-header">
+              <h5>Hospital Map</h5>
+            </Card.Header>
+            <Card.Body className="p-0">
+              <div className="map-container">
+                {mapCenter && (
+                  <MapContainer 
+                    center={mapCenter} 
+                    zoom={13} 
+                    style={{ height: '450px', width: '100%' }}
+                    whenCreated={(map) => {
+                      mapRef.current = map;
+                    }}
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+
+                    {/* Ambulance marker */}
+                    {ambulance && ambulance.location && (
+                      <Marker 
+                        position={[
+                          ambulance.location.coordinates[1], 
+                          ambulance.location.coordinates[0]
+                        ]} 
+                        icon={ambulanceIcon}
+                      >
+                        <Popup className="map-popup">
+                          <div>
+                            <h6 className="mb-1">Your Ambulance</h6>
+                            <p className="mb-1">{ambulance.vehicleNumber}</p>
+                          </div>
+                        </Popup>
+                      </Marker>
+                    )}
+
+                    {/* Hospital markers */}
+                    {hospitals.map(hospital => (
+                      <Marker 
+                        key={hospital._id}
+                        position={[
+                          hospital.location.coordinates[1], 
+                          hospital.location.coordinates[0]
+                        ]} 
+                        icon={createHospitalIcon(hospital.isAcceptingEmergencies)}
+                        eventHandlers={{
+                          click: () => {
+                            selectHospital(hospital);
+                          },
+                        }}
+                      >
+                        <Popup className="map-popup">
+                          <div>
+                            <h6 className="mb-1">{hospital.hospitalName || hospital.name}</h6>
+                            <p className="mb-1">
+                              {hospital.distance !== null && hospital.distance !== undefined 
+                                ? `${hospital.distance.toFixed(1)} km away` 
+                                : 'Distance unknown'}
+                            </p>
+                            <div className="mb-2">
+                              <Badge 
+                                bg={hospital.isAcceptingEmergencies ? "success" : "danger"} 
+                                className="glow-badge-sm"
+                              >
+                                {hospital.isAcceptingEmergencies ? "Accepting" : "Not Accepting"}
+                              </Badge>
+                            </div>
+                            
+                            {/* Doctor Information */}
+                            <div className="doctor-info mb-2">
+                              <h6 className="doctor-info-title">
+                                <FaUserMd className="me-1" /> Doctors
+                              </h6>
+                              {hospital.doctors && hospital.doctors.length > 0 ? (
+                                <div className="doctor-list">
+                                  {hospital.doctors
+                                    .slice(0, 3)
+                                    .map((doctor, index) => (
+                                      <div key={index} className="doctor-item">
+                                        <span className="doctor-name">{doctor.name}</span>
+                                        <div className="doctor-badges">
+                                          <Badge 
+                                            bg="info" 
+                                            className="doctor-specialty"
+                                          >
+                                            {doctor.specialty}
+                                          </Badge>
+                                          <Badge 
+                                            bg={doctor.isAvailable ? "success" : "danger"}
+                                            className="doctor-status-badge"
+                                          >
+                                            {doctor.isAvailable ? "Available" : "Unavailable"}
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                    ))
+                                  }
+                                  {hospital.doctors.length > 3 && (
+                                    <div className="doctor-more">
+                                      +{hospital.doctors.length - 3} more
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <p className="no-doctors">No doctors available</p>
+                              )}
+                            </div>
+                            
+                            <Button 
+                              variant="primary" 
+                              className="mt-2 w-100 gradient-button-sm"
+                              onClick={() => selectHospital(hospital)}
+                            >
+                              View Details
+                            </Button>
+                          </div>
+                        </Popup>
+                      </Marker>
+                    ))}
+                    
+                    {/* Update map view when center changes */}
+                    <ChangeMapView center={mapCenter} />
+                  </MapContainer>
+                )}
+              </div>
+            </Card.Body>
+          </Card>
+
+          {selectedHospital && (
+            <Card className="hospital-details-card hospital-details-container hospital-details-section">
+              <Card.Header className="gradient-header">
+                <h5 className="mb-0 text-gradient-primary">Hospital Details</h5>
+              </Card.Header>
+              <Card.Body className="dark-card-body">
+                <Row>
+                  <Col md={8}>
+                    <h4 className="text-gradient-primary mb-3">{selectedHospital.hospitalName || selectedHospital.name}</h4>
+                    <p className="mb-3 hospital-address">
+                      <strong>Address:</strong><br />
+                      {selectedHospital.address?.street}, {selectedHospital.address?.city}, {selectedHospital.address?.state}, {selectedHospital.address?.zipCode}
+                    </p>
+                    <p className="mb-1">
+                      <Badge bg={selectedHospital.isAcceptingEmergencies ? "success" : "danger"} className="glow-badge">
+                        {selectedHospital.isAcceptingEmergencies ? "Accepting Emergencies" : "Not Accepting"}
+                      </Badge>
+                    </p>
+                    <Button 
+                      variant="primary" 
+                      className="mt-3 gradient-button"
+                      onClick={sendArrivalNotification}
+                      disabled={!selectedHospital.isAcceptingEmergencies}
+                    >
+                      Send Arrival Notification
+                    </Button>
+                  </Col>
+                  <Col md={4}>
+                    <div className="hospital-stats-card">
+                      <div className="stats-header">
+                        <h5 className="text-gradient-accent mb-3">Hospital Stats</h5>
+                      </div>
+                      <div className="stats-item">
+                        <div className="stats-label">Beds</div>
+                        <div className="stats-value">
+                          <FaBed className="me-2" />
+                          {selectedHospital.beds?.available || 0} / {selectedHospital.beds?.total || 0}
+                          <span className="stats-status">available</span>
+                        </div>
+                      </div>
+                      <div className="stats-item">
+                        <div className="stats-label">Doctors</div>
+                        <div className="stats-value">
+                          <FaUserMd className="me-2" />
+                          {selectedHospital.doctors?.length || 0}
+                          <span className="stats-status">available</span>
+                        </div>
+                      </div>
+                      <div className="stats-item">
+                        <div className="stats-label">Emergency Types</div>
+                        <div className="emergency-types mt-2">
+                          {selectedHospital.emergencyTypes?.map((type, index) => (
+                            <Badge 
+                              key={index} 
+                              bg="secondary" 
+                              className="me-1 mb-1 glow-badge-sm"
+                            >
+                              {type}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Doctor List */}
+                    <div className="doctor-list-card mt-3">
+                      <div className="doctor-list-header">
+                        <h5 className="text-gradient-accent mb-0">Doctors</h5>
+                      </div>
+                      <div className="doctor-list-body">
+                        {selectedHospital.doctors && selectedHospital.doctors.length > 0 ? (
+                          <div className="doctor-scroll-list">
+                            {selectedHospital.doctors
+                              .map((doctor, index) => (
+                                <div key={index} className="doctor-detail-item">
+                                  <div className="doctor-avatar">
+                                    <FaUserMd size={20} />
+                                  </div>
+                                  <div className="doctor-detail-info">
+                                    <div className="doctor-detail-name">{doctor.name}</div>
+                                    <div className="doctor-detail-meta">
+                                      <Badge bg="info" className="doctor-specialty-badge">
+                                        {doctor.specialty}
+                                      </Badge>
+                                      <Badge 
+                                        bg={doctor.isAvailable ? "success" : "danger"}
+                                        className="doctor-status-badge"
+                                      >
+                                        {doctor.isAvailable ? "Available" : "Unavailable"}
+                                      </Badge>
+                                      {doctor.experience && (
+                                        <span className="doctor-experience">
+                                          {doctor.experience} yrs exp
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))
+                            }
+                          </div>
+                        ) : (
+                          <div className="no-doctors-message">
+                            No doctors currently available
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </Card>
+          )}
+        </Col>
+      </Row>
+
+      {/* Success Modal */}
+      <Modal show={success !== ''} onHide={() => setSuccess('')} centered>
+        <Modal.Header className="gradient-header">
+          <Modal.Title>Notification Sent</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="dark-card-body">
+          <p className="text-light">{success}</p>
+        </Modal.Body>
+        <Modal.Footer className="gradient-header">
+          <Button variant="primary" className="gradient-button" onClick={() => setSuccess('')}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </Container>
+  );
+};
+
+export default HospitalSearch;

@@ -1,0 +1,578 @@
+[
+  {
+    "id": "TC001",
+    "title": "Hospital Registration Success",
+    "description": "Verify hospital user can successfully register with valid data and receive a JWT token.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to hospital registration page"
+      },
+      {
+        "type": "action",
+        "description": "Input valid hospital registration details (name, email, password, address)"
+      },
+      {
+        "type": "action",
+        "description": "Submit registration form"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that registration is successful and JWT token is issued"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Ambulance Registration Success",
+    "description": "Verify ambulance user can successfully register with valid details and receive a JWT token.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to ambulance registration page"
+      },
+      {
+        "type": "action",
+        "description": "Input valid ambulance registration details (vehicle id, email, password, driver details)"
+      },
+      {
+        "type": "action",
+        "description": "Submit registration form"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that ambulance registration is successful and JWT token is issued"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Hospital Login with Correct Credentials",
+    "description": "Verify hospital user can login successfully with correct email and password and receive valid JWT token.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to hospital login page"
+      },
+      {
+        "type": "action",
+        "description": "Enter valid email and password for a registered hospital"
+      },
+      {
+        "type": "action",
+        "description": "Click login"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify login success and JWT token returned"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Ambulance Login with Correct Credentials",
+    "description": "Verify ambulance user can login successfully with correct credentials and receive valid JWT token.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to ambulance login page"
+      },
+      {
+        "type": "action",
+        "description": "Enter valid ambulance email and password"
+      },
+      {
+        "type": "action",
+        "description": "Click login"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify login success and JWT token returned"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Login Failure with Incorrect Credentials",
+    "description": "Verify login fails with incorrect email or password and appropriate error message is shown.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to login page (hospital or ambulance)"
+      },
+      {
+        "type": "action",
+        "description": "Enter invalid email or wrong password"
+      },
+      {
+        "type": "action",
+        "description": "Try to login"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify login failure and error message is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Role-Based Access Control Enforcement",
+    "description": "Verify hospital users cannot access ambulance-only pages and vice versa; unauthorized access is blocked.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as hospital user"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to navigate to ambulance dashboard URL"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access is denied or redirected"
+      },
+      {
+        "type": "action",
+        "description": "Login as ambulance user"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to navigate to hospital dashboard URL"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access is denied or redirected"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Hospital Doctor Management CRUD Operations",
+    "description": "Verify hospital staff can add, edit, delete, and toggle availability of doctors successfully.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as hospital user"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to doctor management page"
+      },
+      {
+        "type": "action",
+        "description": "Add a new doctor with valid details"
+      },
+      {
+        "type": "assertion",
+        "description": "Check new doctor is listed with correct details"
+      },
+      {
+        "type": "action",
+        "description": "Edit the added doctor's qualification and specialization"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify updated doctor details are saved and displayed"
+      },
+      {
+        "type": "action",
+        "description": "Toggle doctor's availability status"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify availability change is reflected in doctor list and real-time updated to ambulances"
+      },
+      {
+        "type": "action",
+        "description": "Delete the doctor"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the doctor is removed from the list"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Ambulance Hospital Search by Location and Filters",
+    "description": "Verify ambulance users can search nearby hospitals using map location, distance filter, and specialization filters with correct results.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as ambulance user"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to hospital search page"
+      },
+      {
+        "type": "action",
+        "description": "Allow location access and verify map centers on ambulance location"
+      },
+      {
+        "type": "action",
+        "description": "Apply distance and specialization filters"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify hospitals displayed on map and list meet search criteria and show real-time availability"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Emergency Request Creation and Notification Flow",
+    "description": "Verify that ambulance can create an emergency request, hospital receives real-time notification, and hospital can accept or update status with updates broadcast back.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as ambulance"
+      },
+      {
+        "type": "action",
+        "description": "Create an emergency request selecting a hospital from search"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify emergency request successfully created and ambulance sees request status"
+      },
+      {
+        "type": "action",
+        "description": "Login as hospital user on another device or session"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify hospital receives real-time notification of new emergency request"
+      },
+      {
+        "type": "action",
+        "description": "Hospital accepts emergency and updates status"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify ambulance receives real-time status update"
+      },
+      {
+        "type": "action",
+        "description": "Ambulance updates emergency lifecycle statuses (en route, arrived, completed)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify hospital dashboard updates in real-time accordingly"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Real-time Doctor Availability Updates",
+    "description": "Verify toggling doctor availability by hospital user updates ambulance search results and all relevant users in real-time.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as hospital and navigate to doctor management"
+      },
+      {
+        "type": "action",
+        "description": "Toggle availability status of a doctor"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify ambulance users searching hospitals see immediate updated availability"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Ambulance Location Tracking Accuracy",
+    "description": "Verify ambulance location uses browser geolocation to update position accurately on server and map reflects current location with real-time updates.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as ambulance"
+      },
+      {
+        "type": "action",
+        "description": "Allow browser location access"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify ambulance location is sent to server and updated on dashboard map"
+      },
+      {
+        "type": "action",
+        "description": "Simulate location change (move ambulance)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify updated location broadcasts and map marker position changes in real-time"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Profile Management for Hospital and Ambulance",
+    "description": "Verify users can view and edit their profile information correctly, and changes persist after saving.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as hospital user"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to hospital profile page"
+      },
+      {
+        "type": "action",
+        "description": "Edit profile fields and save changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify updated profile info is persisted and displayed correctly"
+      },
+      {
+        "type": "action",
+        "description": "Repeat above steps for ambulance user"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Protected Route Access Control",
+    "description": "Verify unauthenticated users cannot access protected routes, and users with invalid/expired tokens are redirected to login.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to access hospital or ambulance dashboard URL without logging in"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify redirect to login page"
+      },
+      {
+        "type": "action",
+        "description": "Login and get valid JWT token"
+      },
+      {
+        "type": "action",
+        "description": "Manually expire or invalidate token"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to navigate protected routes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify user is logged out and redirected to login"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "System-Wide Statistics Display and Accuracy",
+    "description": "Verify hospital and ambulance dashboards show accurate statistics including counts of hospitals, doctors, available doctors, and emergency request statuses.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as hospital user"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify statistics panel displays correct data matching the backend counts"
+      },
+      {
+        "type": "action",
+        "description": "Login as ambulance user"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify ambulance dashboard statistics reflect accurate live data"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "UI Responsiveness across Devices",
+    "description": "Verify the UI components, including dashboards, forms, and maps, are responsive and accessible on different screen sizes (desktop, tablet, mobile).",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open application on desktop screen"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify UI elements render correctly without overlap or cutoff, and animations/glassmorphism appear correctly"
+      },
+      {
+        "type": "action",
+        "description": "Resize viewport to tablet size and reload"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify UI adjusts layout appropriately with accessible navigation"
+      },
+      {
+        "type": "action",
+        "description": "Resize viewport to mobile size and reload"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify mobile friendly navigation, readable text, and usable interactive elements"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Real-Time Socket.io Communication Stability",
+    "description": "Verify real-time notifications, status updates, and emergency communications are delivered reliably over Socket.io connections without data loss on stable and unstable network conditions.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Establish two sessions: ambulance and hospital users"
+      },
+      {
+        "type": "action",
+        "description": "Trigger emergency requests and status updates between ambulance and hospital"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify real-time data is received instantly on opposite side"
+      },
+      {
+        "type": "action",
+        "description": "Simulate brief network interruptions and reconnections"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify messages delivered after reconnection without duplication or loss"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Error Handling for Invalid Emergency Request Data",
+    "description": "Verify that emergency request creation validates input data and shows appropriate error messages for invalid or missing required fields.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as ambulance"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to create emergency request with missing hospital selection or incomplete patient details"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify creation is blocked and descriptive validation error messages are displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Logout and Token Invalidation",
+    "description": "Verify that logout properly clears user session and invalidates token to prevent further access to protected endpoints without login.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as hospital or ambulance user"
+      },
+      {
+        "type": "action",
+        "description": "Click logout button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify user redirected to login page and token is removed from client storage"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to access protected API endpoints with previous token"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access is denied with authentication error"
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Hospital Emergency Request Handling Deadlines and Edge Cases",
+    "description": "Verify handling of emergency requests when no doctors are available or hospital is at capacity; system should notify ambulance accordingly.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Set hospital doctor availability to zero"
+      },
+      {
+        "type": "action",
+        "description": "Ambulance creates emergency request to that hospital"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify hospital dashboard shows pending request but no available doctors, and ambulance receives notification about lack of capacity"
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Map Interaction and Hospital Selection on Ambulance Dashboard",
+    "description": "Verify ambulance user can interact with Leaflet map, select hospitals, and hospital selection reflects in emergency creation form.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as ambulance user"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to hospital search map"
+      },
+      {
+        "type": "action",
+        "description": "Click on hospital markers on the map"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify selected hospital details populate emergency creation form fields"
+      }
+    ]
+  }
+]

@@ -1,0 +1,250 @@
+/* Add Doctor Modal - Enhanced Design and Colors */
+
+/* Modal Header */
+.modal-header {
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  border-bottom: none;
+  padding: 1.5rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.modal-title {
+  color: #ffffff !important;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header .btn-close {
+  color: #ffffff;
+  opacity: 0.8;
+  filter: brightness(5);
+}
+
+/* Modal Body */
+.modal-body {
+  background-color: #0f172a;
+  padding: 1.5rem;
+  color: #ffffff;
+}
+
+/* Form Labels */
+.modal-body .form-label {
+  color: #d1d5db;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+/* Form Inputs */
+.modal-body .form-control {
+  background-color: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #ffffff;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+}
+
+/* Dropdown specific styles */
+.modal-body select.form-control {
+  appearance: auto;
+  background-color: rgba(30, 41, 59, 0.95);
+  color: white;
+  font-weight: 500;
+  border: 1px solid rgba(99, 102, 241, 0.5);
+}
+
+/* Dropdown options */
+.modal-body select.form-control option {
+  background-color: #1e293b;
+  color: white;
+  font-weight: 500;
+  padding: 10px;
+  font-size: 1rem;
+}
+
+/* Schedule section specific styles */
+.schedule-section select.form-control {
+  background-color: #2d3748;
+  color: white;
+  font-weight: 600;
+  border-color: rgba(99, 102, 241, 0.7);
+}
+
+/* Day dropdown specific styles */
+select[id^="day-"] {
+  background-color: #2d3748;
+  color: white;
+  font-weight: 600;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.4);
+}
+
+select[id^="day-"] option {
+  background-color: #1e293b;
+  color: white;
+  padding: 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+/* Selected option */
+.modal-body select.form-control option:checked {
+  background-color: #3b82f6;
+  color: white;
+  font-weight: 600;
+}
+
+/* Ensure dropdown is visible against dark backgrounds */
+.modal-content {
+  --bs-modal-bg: #0f172a;
+}
+
+/* Force dropdown to be visible */
+.dropdown-menu {
+  background-color: #1e293b !important;
+  border: 1px solid #4f46e5 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dropdown-item {
+  color: white !important;
+  font-weight: 500 !important;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+.modal-body .form-control:focus {
+  background-color: rgba(30, 41, 59, 0.9);
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+}
+
+.modal-body .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Qualification Section */
+.qualifications-section {
+  background-color: rgba(15, 23, 42, 0.5);
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.qualifications-section h5 {
+  color: #4e73df;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* Add Qualification Button */
+.add-qualification-btn {
+  background: linear-gradient(135deg, #4e73df, #6366f1);
+  border: none;
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.add-qualification-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #3b5bdb, #4e73df);
+}
+
+/* Add Schedule Button */
+.add-schedule-btn {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem !important;
+}
+
+.add-schedule-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+}
+
+.add-schedule-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Remove Qualification Button */
+.remove-qualification-btn {
+  background: linear-gradient(135deg, #ef4444, #f87171);
+  border: none;
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.remove-qualification-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+}
+
+/* Modal Footer */
+.modal-footer {
+  background-color: #0f172a;
+  border-top: none;
+  padding: 1.5rem;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* Save Button */
+.save-doctor-btn {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.save-doctor-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #059669, #10b981);
+}
+
+/* Cancel Button */
+.cancel-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #d1d5db;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}

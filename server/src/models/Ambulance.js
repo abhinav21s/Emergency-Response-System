@@ -8,12 +8,15 @@ const ambulanceSchema = new mongoose.Schema({
   lng: { type: Number, required: true },
   driverName: { type: String, required: true, trim: true },
   vehicleNumber: { type: String, required: true, trim: true },
+  loginId: { type: String, unique: true, sparse: true },
+  loginCode: { type: String, select: false },
   activeCall: {
     accident: { lat: Number, lng: Number },
     distanceKm: Number,
     etaMinutes: Number,
     accepted: { type: Boolean, default: false },
-    dispatchedAt: Date
+    dispatchedAt: Date,
+    tripId: { type: mongoose.Schema.Types.ObjectId, ref: 'Trip' }
   }
 }, { timestamps: true });
 

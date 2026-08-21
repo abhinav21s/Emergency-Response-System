@@ -1,0 +1,7 @@
+The notification.mp3 file should be a short bell or alert sound.
+You can download a free notification sound from sources like:
+1. https://mixkit.co/free-sound-effects/notification/
+2. https://notificationsounds.com/
+3. https://www.zapsplat.com/sound-effect-category/notifications-and-prompts/
+
+Download a short bell or alert sound and save it as notification.mp3 in this directory.

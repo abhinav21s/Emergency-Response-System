@@ -1,0 +1,373 @@
+/* Ambulance Text Visibility Enhancements */
+
+/* Dashboard Text Improvements */
+.dashboard-card h3 {
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  color: white !important;
+  font-size: 1.2rem;
+}
+
+.status-text {
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-size: 1.5rem;
+  letter-spacing: 0.5px;
+}
+
+.status-description {
+  color: #f8f9fc !important;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.stat-number {
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-size: 2.5rem !important;
+  color: white !important;
+}
+
+.stat-description {
+  color: #f8f9fc !important;
+  font-weight: 500;
+  font-size: 1rem !important;
+}
+
+.hospitals-list h4 {
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  color: white !important;
+  margin-bottom: 10px;
+}
+
+.hospitals-list span {
+  color: white !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.hospitals-list div {
+  color: #e0e0e0 !important;
+}
+
+/* Server Status Card */
+.server-status .status-text {
+  color: #2ecc71 !important;
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+}
+
+.server-status .card-content p {
+  color: #e0e0e0 !important;
+  font-size: 0.95rem;
+}
+
+/* Hospitals Available Card */
+.hospitals-available .card-content {
+  color: white !important;
+}
+
+.hospitals-available .hospitals-list li {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 8px 0 !important;
+}
+
+.hospitals-available .hospitals-list span {
+  color: white !important;
+}
+
+/* Selected Hospital Card */
+.selected-hospital h3 {
+  color: white !important;
+}
+
+.selected-hospital h4 {
+  color: white !important;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.selected-hospital .hospital-details p {
+  color: #e0e0e0 !important;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.selected-hospital .hospital-details strong {
+  color: white !important;
+  font-weight: 600;
+}
+
+.selected-hospital .status-closed {
+  color: #e74c3c !important;
+  font-weight: 600;
+}
+
+/* Ambulance Information Card */
+.ambulance-information h3 {
+  color: white !important;
+}
+
+.ambulance-information p {
+  color: #e0e0e0 !important;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.ambulance-information strong {
+  color: white !important;
+  font-weight: 600;
+}
+
+/* Quick Actions Card */
+.quick-actions h3 {
+  color: white !important;
+}
+
+.quick-actions .btn {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* General Improvements */
+.dashboard-card {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+.card-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.dashboard-wrapper {
+  color: white !important;
+}
+
+/* Enhance all text in dashboard */
+.dashboard-wrapper p, 
+.dashboard-wrapper div, 
+.dashboard-wrapper span {
+  color: #e0e0e0 !important;
+}
+
+.dashboard-wrapper h1, 
+.dashboard-wrapper h2, 
+.dashboard-wrapper h3, 
+.dashboard-wrapper h4, 
+.dashboard-wrapper h5, 
+.dashboard-wrapper h6, 
+.dashboard-wrapper strong {
+  color: white !important;
+}
+
+/* Hospital Search Text Improvements */
+.search-title, 
+.search-subtitle {
+  color: #f8f9fc !important;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.filter-label {
+  color: #f8f9fc !important;
+  font-weight: 500;
+}
+
+.hospital-item h5 {
+  color: #f8f9fc !important;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.hospital-address, 
+.hospital-distance {
+  color: #e0e0e0 !important;
+}
+
+.dark-card-body p {
+  color: #e0e0e0 !important;
+}
+
+.doctor-info-title {
+  color: #f8f9fc !important;
+  font-weight: 600;
+}
+
+.doctor-name {
+  color: #f8f9fc !important;
+  font-weight: 500;
+}
+
+.no-doctors {
+  color: #e0e0e0 !important;
+}
+
+.text-gradient-primary {
+  color: #f8f9fc !important;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.text-gradient-accent {
+  color: #f8f9fc !important;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.stats-label {
+  color: #e0e0e0 !important;
+  font-weight: 500;
+}
+
+.stats-value {
+  color: #f8f9fc !important;
+  font-weight: 600;
+}
+
+.stats-status {
+  color: #e0e0e0 !important;
+}
+
+.doctor-detail-name {
+  color: #f8f9fc !important;
+  font-weight: 600;
+}
+
+.doctor-experience {
+  color: #e0e0e0 !important;
+}
+
+/* Notification Text Improvements */
+.notification-icon {
+  color: #f8f9fc;
+}
+
+.notification-title {
+  color: #f8f9fc !important;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.notification-message {
+  color: #e0e0e0 !important;
+}
+
+.notification-time {
+  color: #cccccc !important;
+}
+
+/* Empty notifications state */
+h2.mb-4 {
+  color: white !important;
+  font-size: 2rem;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+h4 {
+  color: white !important;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.text-muted {
+  color: #e0e0e0 !important;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+/* Notifications page specific */
+.notifications-page h1,
+.notifications-page h2 {
+  color: white !important;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.notifications-page .card-body {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+}
+
+.notifications-page .text-center h4 {
+  color: white !important;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+.notifications-page .text-center p {
+  color: #e0e0e0 !important;
+  font-size: 1rem;
+}
+
+.notifications-page .text-muted {
+  color: #e0e0e0 !important;
+}
+
+/* No notifications message */
+.no-notifications-icon {
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-size: 3rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.no-notifications-title {
+  color: white !important;
+  font-size: 1.75rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.no-notifications-message {
+  color: #e0e0e0 !important;
+  font-size: 1rem !important;
+}
+
+/* Page title with icon */
+.page-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.page-title .fa-bell,
+.page-title svg {
+  color: #ffc107 !important;
+  font-size: 2rem;
+  margin-right: 1rem;
+}
+
+.page-title h1 {
+  color: white !important;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* General dark background text improvements */
+.dark-card-body {
+  color: #f8f9fc !important;
+}
+
+.dark-card-body h5,
+.dark-card-body h4,
+.dark-card-body h3 {
+  color: #f8f9fc !important;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge enhancements */
+.glow-badge {
+  font-weight: 600;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+.glow-badge-sm {
+  font-weight: 500;
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.2);
+}

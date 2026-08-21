@@ -1,0 +1,174 @@
+/* Improved Text Visibility Styles */
+
+:root {
+  /* Enhanced Text Colors with Better Contrast */
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+  --text-muted: #a0aec0;
+  
+  /* Enhanced Glass UI Text Colors */
+  --glass-text-primary: rgba(255, 255, 255, 1);
+  --glass-text-secondary: rgba(255, 255, 255, 0.85);
+  --glass-text-muted: rgba(255, 255, 255, 0.7);
+  
+  /* Enhanced DesignLab Text Colors */
+  --designlab-text: #ffffff;
+  --designlab-text-secondary: rgba(255, 255, 255, 0.85);
+  --designlab-text-muted: rgba(255, 255, 255, 0.7);
+}
+
+/* Global Text Enhancement */
+body {
+  color: var(--text-primary);
+}
+
+/* Card Text Enhancement */
+.card {
+  color: var(--text-primary);
+}
+
+.card-title {
+  color: var(--text-primary);
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.card-subtitle, .card-text {
+  color: var(--text-secondary);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Dashboard Stats Enhancement */
+.stat-card {
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.stat-card .stat-value {
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.stat-card .stat-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Table Text Enhancement */
+.table {
+  color: var(--text-primary);
+}
+
+.table th {
+  color: var(--text-primary);
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.table td {
+  color: var(--text-secondary);
+}
+
+/* Emergency Requests Enhancement */
+.emergency-request-card {
+  background: rgba(30, 41, 59, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.emergency-request-card .request-title {
+  color: var(--text-primary);
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.emergency-request-card .request-details {
+  color: var(--text-secondary);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Badge Enhancement */
+.badge {
+  font-weight: 600;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Section Headers */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Navbar Enhancement */
+.navbar {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-brand, .nav-link {
+  color: var(--text-primary) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Button Text Enhancement */
+.btn {
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Form Label Enhancement */
+.form-label {
+  color: var(--text-primary);
+  font-weight: 500;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Status Indicators */
+.status-indicator {
+  font-weight: 600;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.status-available {
+  color: var(--success);
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.status-unavailable {
+  color: var(--danger);
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+/* Hospital Status Section */
+.hospital-status-section {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hospital-status-section .hospital-name {
+  color: var(--text-primary);
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(135deg, #ffffff, #a5b4fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hospital-status-section .hospital-status {
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}

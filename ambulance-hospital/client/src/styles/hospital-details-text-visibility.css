@@ -1,0 +1,87 @@
+/* Hospital Details Text Visibility Enhancement - Colors Only */
+
+/* Hospital name */
+.hospital-details-container h2,
+.hospital-details-container .hospital-name {
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Hospital address */
+.hospital-details-container .address-label {
+  color: #4e73df;
+  font-weight: 600;
+}
+
+.hospital-details-container .address-value {
+  color: #ffffff;
+}
+
+/* Hospital stats section */
+.hospital-details-container .hospital-stats-title {
+  color: #4e73df;
+  font-weight: 600;
+}
+
+.hospital-details-container .stat-label {
+  color: #d1d5db;
+}
+
+.hospital-details-container .stat-value {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Hospital specialties */
+.hospital-details-container .specialty-badge {
+  color: #ffffff;
+}
+
+/* Doctors section */
+.hospital-details-container .doctors-title {
+  color: #4e73df;
+  font-weight: 600;
+}
+
+.hospital-details-container .doctor-name {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.hospital-details-container .doctor-specialty {
+  color: #d1d5db;
+}
+
+/* Hospital details section */
+.hospital-details-container .hospital-details-title {
+  color: #4e73df;
+  font-weight: 600;
+}
+
+/* Baptist hospital name */
+.hospital-details-container .baptist-name {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Distance information */
+.hospital-details-container .distance-info {
+  color: #ffffff;
+}
+
+/* Accepting emergencies badge */
+.hospital-details-container .accepting-emergencies {
+  color: #ffffff;
+  background-color: #10b981;
+}
+
+/* Hospital details section */
+.hospital-details-section {
+  color: #ffffff;
+}
+
+/* Hospital details section title */
+.hospital-details-section .section-title {
+  color: #4e73df;
+  font-weight: 600;
+}

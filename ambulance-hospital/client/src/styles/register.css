@@ -1,0 +1,1522 @@
+/* Registration Page Styles */
+.justice-register-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  padding: 2rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Glass Morphism Container */
+.justice-register-container {
+  background: rgba(30, 41, 59, 0.2);
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+  max-width: 800px;
+  width: 100%;
+  position: relative;
+  z-index: 10;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+/* Glass Card Effect */
+.glass-card {
+  background: rgba(15, 23, 42, 0.2) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+  overflow: hidden;
+}
+
+.glass-card-header {
+  background: rgba(79, 141, 255, 0.2) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+  padding: 1.5rem !important;
+}
+
+.glass-card-body {
+  padding: 2rem !important;
+  position: relative;
+  z-index: 1;
+}
+
+.glass-card-footer {
+  background: rgba(15, 23, 42, 0.3) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+}
+
+/* Glowing Effects */
+.glow-effect {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  filter: blur(40px);
+  z-index: 0;
+  opacity: 0.5;
+  animation: pulse 8s infinite alternate;
+}
+
+.glow-blue {
+  background: rgba(79, 141, 255, 0.4);
+  top: -50px;
+  left: -50px;
+  animation-delay: 0s;
+}
+
+.glow-purple {
+  background: rgba(159, 90, 253, 0.4);
+  bottom: -50px;
+  right: -50px;
+  animation-delay: 2s;
+}
+
+.glow-pink {
+  background: rgba(236, 72, 153, 0.3);
+  top: 50%;
+  right: -70px;
+  animation-delay: 4s;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+}
+
+.justice-logo {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #4b75ff, #9f5afd);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 0 25px rgba(79, 141, 255, 0.6);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.justice-logo::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(45deg);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(45deg);
+  }
+}
+
+.justice-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(to right, #4f8dff, #9f5afd);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 10px rgba(79, 141, 255, 0.4);
+}
+
+.justice-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Toggle Button Styles */
+.toggle-container {
+  display: flex;
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 12px;
+  padding: 0.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-btn {
+  border-radius: 10px !important;
+  padding: 0.8rem 1.5rem !important;
+  margin: 0 0.2rem !important;
+  transition: all 0.3s ease !important;
+  border: none !important;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, #4b75ff, #9f5afd) !important;
+  box-shadow: 0 5px 15px rgba(79, 141, 255, 0.3) !important;
+}
+
+.toggle-btn.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+  z-index: -1;
+}
+
+/* Registration form improvements */
+.form-control, .form-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  height: calc(3rem + 2px);
+}
+
+.form-control:focus, .form-select:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  opacity: 1;
+}
+
+.form-text {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  display: block;
+}
+
+.form-control::placeholder, .form-select::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.form-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.custom-form-floating {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.custom-form-floating .form-label {
+  position: absolute;
+  top: -30px;
+  left: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.custom-input {
+  padding-left: 2.5rem;
+  height: 50px;
+  background-color: rgba(15, 23, 42, 0.6) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  color: white !important;
+  border-radius: 0.5rem !important;
+  transition: all 0.3s ease;
+}
+
+.custom-input:focus {
+  background-color: rgba(15, 23, 42, 0.8) !important;
+  border-color: #4b75ff !important;
+  box-shadow: 0 0 0 3px rgba(79, 141, 255, 0.2) !important;
+}
+
+.custom-input::placeholder {
+  color: #64748b !important;
+}
+
+/* Button Styles */
+.register-button {
+  background: linear-gradient(135deg, #4b75ff, #9f5afd) !important;
+  border: none !important;
+  padding: 0.75rem 1.5rem !important;
+  font-weight: 600 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem !important;
+  transition: all 0.3s ease !important;
+  height: 50px;
+}
+
+.register-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 5px 15px rgba(79, 141, 255, 0.4) !important;
+}
+
+.back-button {
+  background: transparent !important;
+  border: 1px solid rgba(99, 102, 241, 0.4) !important;
+  color: #cbd5e1 !important;
+}
+
+.back-button:hover {
+  background: rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Error Message */
+.error-message {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-left: 4px solid #ef4444;
+  color: #fecaca;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Floating Icons */
+.floating-icon {
+  position: absolute;
+  font-size: 2rem;
+  color: rgba(99, 102, 241, 0.2);
+  z-index: 1;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .justice-register-container {
+    padding: 1.5rem;
+  }
+  
+  .justice-title {
+    font-size: 2rem;
+  }
+  
+  .role-toggle-buttons {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .role-toggle-btn {
+    width: 100%;
+  }
+}
+
+/* Animation Scene */
+.ambulance-scene-container {
+  height: 150px;
+  position: relative;
+  margin: 2rem 0;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+/* Improved Input Icon Styles */
+.input-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+/* Fix for the absolute positioned icons */
+.custom-input-group .input-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  color: #94a3b8;
+}
+
+/* Login Link */
+.login-link {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #cbd5e1;
+}
+
+.login-link a {
+  color: #4b75ff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.login-link a:hover {
+  color: #9f5afd;
+  text-decoration: underline;
+}
+
+/* Enhanced Registration Form Styles */
+
+.registration-card {
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden;
+}
+
+.registration-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+.icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  margin: 0 auto;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+.toggle-container {
+  display: flex;
+  background-color: #f1f3f5;
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.toggle-btn {
+  flex: 1;
+  border-radius: 6px !important;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-btn.active {
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.input-group {
+  transition: all 0.3s ease;
+}
+
+.input-group:focus-within {
+  transform: translateY(-2px);
+}
+
+.form-control:focus {
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.2) !important;
+  border-color: #0d6efd !important;
+}
+
+.form-control.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2) !important;
+  border-color: #dc3545 !important;
+}
+
+/* Password strength meter */
+.strength-meter {
+  display: flex;
+  margin-top: 5px;
+  height: 5px;
+  width: 150px;
+}
+
+.strength-segment {
+  flex: 1;
+  height: 100%;
+  margin: 0 2px;
+  background-color: #e9ecef;
+  border-radius: 2px;
+  transition: background-color 0.3s ease;
+}
+
+.strength-segment.bg-danger {
+  background-color: #dc3545;
+}
+
+.strength-segment.bg-warning {
+  background-color: #ffc107;
+}
+
+.strength-segment.bg-success {
+  background-color: #198754;
+}
+
+.terms-section {
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 15px;
+}
+
+.register-btn {
+  font-weight: 600;
+  padding: 12px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+/* Form field animations */
+.form-control, 
+.form-select {
+  transition: all 0.3s ease;
+}
+
+.form-control:focus, 
+.form-select:focus {
+  transform: scale(1.01);
+}
+
+/* Improve mobile responsiveness */
+@media (max-width: 768px) {
+  .toggle-container {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .strength-meter {
+    width: 100%;
+  }
+  
+  .col-md-6.mb-3 {
+    margin-bottom: 1rem !important;
+  }
+}
+
+/* Tooltip enhancements */
+.tooltip {
+  font-size: 0.85rem !important;
+  opacity: 1 !important;
+}
+
+.tooltip .tooltip-inner {
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  padding: 8px 12px;
+  max-width: 220px;
+}
+
+/* Info icon hover effect */
+.fa-info-circle {
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.fa-info-circle:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Registration Selection Page Styles */
+.selection-page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(135deg, #020617 0%, #0f1c4d 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e2e8f0;
+}
+
+.selection-container {
+  background-color: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+  overflow: hidden;
+  width: 100%;
+  max-width: 900px;
+  padding: 30px;
+  text-align: center;
+}
+
+h1 {
+  font-weight: 700;
+  font-size: 28px;
+  margin-bottom: 10px;
+  color: white;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.selection-container > p {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 30px;
+}
+
+.options-container {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 30px;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .options-container {
+    flex-direction: column;
+  }
+}
+
+.option-card {
+  background-color: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 30px;
+  width: 45%;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .option-card {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+}
+
+.option-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.hospital-card {
+  border-color: rgba(78, 115, 223, 0.3);
+}
+
+.hospital-card:hover {
+  background-color: rgba(78, 115, 223, 0.1);
+}
+
+.ambulance-card {
+  border-color: rgba(231, 74, 59, 0.3);
+}
+
+.ambulance-card:hover {
+  background-color: rgba(231, 74, 59, 0.1);
+}
+
+.option-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+  display: block;
+}
+
+.option-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.option-description {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 20px;
+}
+
+.btn-hospital {
+  background: rgba(78, 115, 223, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-hospital:hover {
+  background: rgba(78, 115, 223, 0.95);
+  transform: translateY(-2px);
+}
+
+.btn-ambulance {
+  background: rgba(231, 74, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-ambulance:hover {
+  background: rgba(231, 74, 59, 0.95);
+  transform: translateY(-2px);
+}
+
+/* Selection Page Styles */
+.selection-page {
+  background-color: #000a1f; /* Premium blackish-blue background */
+  background-image: radial-gradient(circle at 10% 10%, #051a3f 0%, #000a1f 70%); /* Premium blackish-blue radial gradient */
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.selection-container {
+  max-width: 1000px;
+  width: 90%;
+  margin: 0 auto;
+  text-align: center;
+  padding: 3rem 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.selection-container h1 {
+  color: #ffffff;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.selection-container p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.2rem;
+  margin-bottom: 3rem;
+}
+
+.options-container {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.option-card {
+  flex: 1;
+  min-width: 280px;
+  max-width: 400px;
+  padding: 2.5rem 2rem;
+  border-radius: 15px;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.option-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.hospital-card {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(33, 150, 243, 0.2) 100%);
+  border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.ambulance-card {
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.1) 0%, rgba(244, 67, 54, 0.2) 100%);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.option-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+.option-title {
+  color: #ffffff;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.option-description {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 2rem;
+  flex-grow: 1;
+}
+
+.btn-hospital, .btn-ambulance {
+  padding: 0.8rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  border: none;
+  width: 100%;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-hospital {
+  background: linear-gradient(135deg, #2196f3 0%, #0d47a1 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+}
+
+.btn-ambulance {
+  background: linear-gradient(135deg, #f44336 0%, #b71c1c 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+}
+
+.btn-hospital:hover {
+  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.6);
+  transform: translateY(-3px);
+}
+
+.btn-ambulance:hover {
+  box-shadow: 0 6px 20px rgba(244, 67, 54, 0.6);
+  transform: translateY(-3px);
+}
+
+/* Add responsive styles for smaller screens */
+@media (max-width: 768px) {
+  .selection-container h1 {
+    font-size: 2rem;
+  }
+  
+  .selection-container p {
+    font-size: 1rem;
+  }
+  
+  .options-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .option-card {
+    width: 100%;
+  }
+}
+
+/* Login Page Styles */
+.login-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+.login-header {
+  padding: 2.5rem 2rem 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.hospital-header {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.2) 0%, rgba(33, 150, 243, 0.4) 100%);
+  border-bottom: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.ambulance-header {
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.2) 0%, rgba(244, 67, 54, 0.4) 100%);
+  border-bottom: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.login-header h2 {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 1rem 0 0.5rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.login-header p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+.icon-container {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.login-body {
+  padding: 2.5rem;
+}
+
+.login-alert {
+  background: rgba(220, 53, 69, 0.2);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  color: #fff;
+  margin-bottom: 1.5rem;
+}
+
+.login-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.login-input-group {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.input-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  z-index: 10;
+  width: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.login-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  padding: 0.75rem 0.75rem 0.75rem 10px;
+  height: 50px;
+  font-size: 1rem;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.login-input:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.login-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.login-checkbox label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.login-link {
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.hospital-link {
+  color: #64b5f6;
+}
+
+.ambulance-link {
+  color: #ff8a80;
+}
+
+.hospital-link:hover {
+  color: #90caf9;
+  text-shadow: 0 0 8px rgba(33, 150, 243, 0.6);
+}
+
+.ambulance-link:hover {
+  color: #ffab91;
+  text-shadow: 0 0 8px rgba(244, 67, 54, 0.6);
+}
+
+.login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-top: 1.5rem;
+  border: none;
+  transition: all 0.3s ease;
+  height: 50px;
+}
+
+.hospital-button {
+  background: linear-gradient(135deg, #2196f3 0%, #0d47a1 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+}
+
+.ambulance-button {
+  background: linear-gradient(135deg, #f44336 0%, #b71c1c 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+}
+
+.hospital-button:hover {
+  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.6);
+  transform: translateY(-3px);
+}
+
+.ambulance-button:hover {
+  box-shadow: 0 6px 20px rgba(244, 67, 54, 0.6);
+  transform: translateY(-3px);
+}
+
+.login-footer {
+  margin-top: 2rem;
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.login-footer p {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.register-link {
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.hospital-register {
+  color: #64b5f6;
+}
+
+.ambulance-register {
+  color: #ff8a80;
+}
+
+.hospital-register:hover {
+  color: #90caf9;
+  text-shadow: 0 0 8px rgba(33, 150, 243, 0.6);
+}
+
+.ambulance-register:hover {
+  color: #ffab91;
+  text-shadow: 0 0 8px rgba(244, 67, 54, 0.6);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .login-header {
+    padding: 2rem 1.5rem 1.5rem;
+  }
+  
+  .login-body {
+    padding: 2rem 1.5rem;
+  }
+  
+  .icon-container {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .login-header h2 {
+    font-size: 1.75rem;
+  }
+  
+  /* Fix mobile form issues */
+  .login-input {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+  
+  .login-button {
+    min-height: 48px; /* Ensure touch target is large enough */
+    font-size: 16px;
+  }
+  
+  /* Prevent form reset on mobile */
+  .login-card {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  
+  /* Fix viewport issues on mobile */
+  .selection-page {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Modern Registration Form Styles */
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000a1f;
+  background-image: radial-gradient(circle at 10% 10%, #051a3f 0%, #000a1f 70%);
+  padding: 3rem 0;
+}
+
+.register-container {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 0 0 30px rgba(79, 141, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  padding: 0;
+}
+
+.register-header {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.2) 0%, rgba(33, 150, 243, 0.4) 100%);
+  padding: 2.5rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.register-icon {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.register-header h1 {
+  color: #ffffff;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.register-header p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
+  margin-bottom: 0;
+}
+
+.register-form {
+  padding: 2.5rem;
+}
+
+.register-alert {
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  color: #fff;
+  margin-bottom: 2rem;
+  border-radius: 10px;
+}
+
+.custom-form-floating {
+  position: relative;
+  margin-bottom: 2.5rem; /* Increased to make room for label above */
+}
+
+.input-icon-wrapper {
+  position: absolute;
+  left: -25px; /* Moved much further left */
+  top: -30px; /* Match label position */
+  transform: none;
+  z-index: 5;
+  color: rgba(255, 255, 255, 0.7);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-form-control {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: white;
+  height: 60px;
+  font-size: 1rem;
+  padding: 0 1rem; /* Simplified padding - no top padding needed */
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.custom-form-control:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+  color: white;
+  outline: none;
+}
+
+/* Make placeholder completely transparent to avoid overlap */
+.custom-form-control::placeholder {
+  color: transparent !important;
+}
+
+/* Position label ABOVE the input field */
+.form-floating > .form-label {
+  position: absolute;
+  top: -30px; /* Position above the input field */
+  left: 15px; /* Adjusted to account for icon position */
+  height: auto;
+  padding: 0;
+  pointer-events: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  font-weight: 500;
+  z-index: 2;
+  transform: none;
+  transition: color 0.2s ease;
+}
+
+/* Just change color when focused, no need to move */
+.form-floating > .custom-form-control:focus ~ .form-label,
+.form-floating > .custom-form-control:not(:placeholder-shown) ~ .form-label {
+  color: rgba(255, 255, 255, 1);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+/* Form Select specific styling */
+.form-select.custom-form-control {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px 12px;
+  appearance: none;
+  padding-right: 2.5rem;
+}
+
+.form-select.custom-form-control option {
+  background-color: #051a3f;
+  color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .register-container {
+    margin: 0 1rem;
+  }
+  
+  .register-header {
+    padding: 2rem 1.5rem;
+  }
+  
+  .register-form {
+    padding: 1.5rem;
+  }
+  
+  .register-icon {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .register-header h1 {
+    font-size: 1.8rem;
+  }
+}
+
+/* Ambulance Registration Styles */
+.ambulance-container {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 79, 79, 0.1);
+}
+
+.ambulance-header {
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.2) 0%, rgba(244, 67, 54, 0.4) 100%);
+  border-bottom: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.ambulance-icon {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 20px rgba(244, 67, 54, 0.2);
+}
+
+.ambulance-button {
+  background: linear-gradient(135deg, #f44336 0%, #b71c1c 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+}
+
+.ambulance-button:hover {
+  box-shadow: 0 6px 20px rgba(244, 67, 54, 0.6);
+  transform: translateY(-3px);
+}
+
+.ambulance-link {
+  color: #ff8a80;
+  transition: all 0.3s ease;
+}
+
+.ambulance-link:hover {
+  color: #ffab91;
+  text-shadow: 0 0 8px rgba(244, 67, 54, 0.6);
+}
+
+/* Specialty Checkboxes */
+.specialty-checkboxes {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-check-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  padding-left: 0.5rem;
+}
+
+.form-check-input {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.form-check-input:checked {
+  background-color: #2196f3;
+  border-color: #2196f3;
+}
+
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.25rem rgba(33, 150, 243, 0.25);
+  border-color: #2196f3;
+}
+
+.ambulance-container .form-check-input:checked {
+  background-color: #f44336;
+  border-color: #f44336;
+}
+
+.ambulance-container .form-check-input:focus {
+  box-shadow: 0 0 0 0.25rem rgba(244, 67, 54, 0.25);
+  border-color: #f44336;
+}
+
+/* Fix for form controls with floating labels */
+.custom-form-floating {
+  position: relative;
+  margin-bottom: 2.5rem; /* Increased to make room for label above */
+}
+
+.input-icon-wrapper {
+  position: absolute;
+  left: -25px; /* Moved much further left */
+  top: -30px; /* Match label position */
+  transform: none;
+  z-index: 5;
+  color: rgba(255, 255, 255, 0.7);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-form-control {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: white;
+  height: 60px;
+  font-size: 1rem;
+  padding: 0 1rem; /* Simplified padding - no top padding needed */
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.custom-form-control:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+  color: white;
+  outline: none;
+}
+
+/* Make placeholder completely transparent to avoid overlap */
+.custom-form-control::placeholder {
+  color: transparent !important;
+}
+
+/* Position label ABOVE the input field */
+.form-floating > .form-label {
+  position: absolute;
+  top: -30px; /* Position above the input field */
+  left: 15px; /* Adjusted to account for icon position */
+  height: auto;
+  padding: 0;
+  pointer-events: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  font-weight: 500;
+  z-index: 2;
+  transform: none;
+  transition: color 0.2s ease;
+}
+
+/* Just change color when focused, no need to move */
+.form-floating > .custom-form-control:focus ~ .form-label,
+.form-floating > .custom-form-control:not(:placeholder-shown) ~ .form-label {
+  color: rgba(255, 255, 255, 1);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+/* Form Select specific styling */
+.form-select.custom-form-control {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px 12px;
+  appearance: none;
+  padding-right: 2.5rem;
+}
+
+.form-select.custom-form-control option {
+  background-color: #051a3f;
+  color: white;
+}
+
+/* Section Titles for Registration Forms */
+.section-title {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 3rem 0 2.5rem; /* Increased bottom margin to add more gap */
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  clear: both;
+  display: block;
+  width: 100%;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(33, 150, 243, 0.9), rgba(33, 150, 243, 0.3));
+}
+
+.ambulance-container .section-title::after {
+  background: linear-gradient(90deg, rgba(244, 67, 54, 0.9), rgba(244, 67, 54, 0.3));
+}
+
+/* Operating Hours Container */
+.operating-hours-container {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Add extra space after the first form field in each section */
+.section-title + .row .form-floating {
+  margin-top: 0.5rem;
+}

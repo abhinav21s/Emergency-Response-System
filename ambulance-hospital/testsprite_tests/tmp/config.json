@@ -1,0 +1,18 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3000",
+  "loginUser": "disha@gmail.com",
+  "loginPassword": "123456",
+  "executionArgs": {
+    "projectName": "Justice_MDB",
+    "projectPath": "D:\\All\\Projects\\Justice_MDB\\Justice_MDB",
+    "testIds": [],
+    "additionalInstruction": "Use the following test credentials:\n- Hospital Login: email: disha@gmail.com, password: 123456\n- Ambulance Login: email: aditya@gmail.com, password: 123456\nTest both hospital and ambulance interfaces thoroughly.\n",
+    "envs": {
+      "API_KEY": "sk-user-g8gT-M8KbELjQ_dwACMp-CEf1AgP0s0sDY8914pFegEx41of3dsjEQLvPvFe5kOy9KL6XqYwJu12_dcW594Wulrnv2Ijyl2Rd985ya5g7jVTfpFJHLl2X8A9H6Tlpq6_hHg"
+    }
+  },
+  "proxy": "http://2f396b96-e276-42c9-ba57-6b136faf6e27:ASxoaGEr3xHvbz4wPV9hi6WDcZUve1Xx@tun.testsprite.com:8080"
+}

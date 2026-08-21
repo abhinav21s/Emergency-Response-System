@@ -1,0 +1,230 @@
+{
+  "tech_stack": [
+    "JavaScript",
+    "React.js",
+    "Node.js",
+    "Express.js",
+    "MongoDB",
+    "Mongoose",
+    "Socket.io",
+    "JWT",
+    "Leaflet",
+    "React Router",
+    "React Bootstrap",
+    "Axios",
+    "Framer Motion",
+    "React Toastify",
+    "Google Maps API"
+  ],
+  "features": [
+    {
+      "name": "Hospital Registration & Login",
+      "description": "Hospital authentication with registration and login functionality. Includes JWT token-based authentication.",
+      "files": [
+        "client/src/pages/hospital/Register.js",
+        "client/src/pages/hospital/Login.js",
+        "server/controllers/auth.controller.js",
+        "server/models/hospital.model.js"
+      ]
+    },
+    {
+      "name": "Ambulance Registration & Login",
+      "description": "Ambulance authentication with registration and login functionality. Includes JWT token-based authentication.",
+      "files": [
+        "client/src/pages/ambulance/Register.js",
+        "client/src/pages/ambulance/Login.js",
+        "server/controllers/auth.controller.js",
+        "server/models/ambulance.model.js"
+      ]
+    },
+    {
+      "name": "Hospital Dashboard",
+      "description": "Hospital dashboard showing statistics (total doctors, available doctors, pending requests, accepted requests), recent emergency requests, and quick access to other features.",
+      "files": [
+        "client/src/pages/hospital/Dashboard.js",
+        "client/src/components/hospital/HospitalNavbar.js",
+        "server/controllers/hospital.controller.js"
+      ]
+    },
+    {
+      "name": "Ambulance Dashboard",
+      "description": "Ambulance dashboard showing statistics (hospitals available, selected hospital info, ambulance information), location tracking status, and quick actions.",
+      "files": [
+        "client/src/pages/ambulance/Dashboard.js",
+        "client/src/components/ambulance/AmbulanceNavbar.js",
+        "server/controllers/ambulance.controller.js"
+      ]
+    },
+    {
+      "name": "Doctor Management",
+      "description": "CRUD operations for doctors including add, edit, delete, and toggle availability. Manage doctor profiles with qualifications, specializations, and schedules.",
+      "files": [
+        "client/src/pages/hospital/DoctorManagement.js",
+        "client/src/styles/add-doctor-modal.css",
+        "client/src/styles/doctor-management-text-visibility.css",
+        "server/controllers/doctor.controller.js",
+        "server/models/doctor.model.js"
+      ]
+    },
+    {
+      "name": "Emergency Management",
+      "description": "Create, update, and track emergency requests. Real-time emergency notifications between ambulances and hospitals.",
+      "files": [
+        "client/src/pages/hospital/EmergencyRequests.js",
+        "client/src/pages/ambulance/EmergencyDetails.js",
+        "client/src/pages/ambulance/Notifications.js",
+        "client/src/components/hospital/HospitalNotifications.js",
+        "server/controllers/emergency.controller.js",
+        "server/models/emergency.model.js",
+        "client/src/styles/emergency-text-visibility.css",
+        "client/src/styles/emergency-alert-modal.css"
+      ]
+    },
+    {
+      "name": "Hospital Search with Map",
+      "description": "Interactive map showing nearby hospitals with real-time availability. Filter hospitals by specialization and distance. Select hospitals for emergency notifications.",
+      "files": [
+        "client/src/pages/ambulance/HospitalSearch.js",
+        "client/src/styles/hospital-search-text-visibility.css",
+        "client/src/styles/hospital-selection.css"
+      ]
+    },
+    {
+      "name": "Real-time Notifications",
+      "description": "Socket.io based real-time notifications for emergency requests, hospital updates, doctor availability changes, and location updates.",
+      "files": [
+        "client/src/context/SocketContext.js",
+        "server/services/socket.js",
+        "server/models/notification.model.js",
+        "server/controllers/notification.controller.js",
+        "client/src/styles/notification-styles.css"
+      ]
+    },
+    {
+      "name": "Location Tracking",
+      "description": "Real-time ambulance location tracking using browser geolocation API. Updates location on server and broadcasts via Socket.io.",
+      "files": [
+        "client/src/pages/ambulance/Dashboard.js",
+        "server/controllers/ambulance.controller.js"
+      ]
+    },
+    {
+      "name": "Profile Management",
+      "description": "View and edit profile information for both hospitals and ambulances.",
+      "files": [
+        "client/src/pages/hospital/Profile.js",
+        "client/src/pages/ambulance/Profile.js",
+        "client/src/styles/profile-text-visibility.css"
+      ]
+    },
+    {
+      "name": "Authentication Context",
+      "description": "Centralized authentication state management with login, logout, token verification, and role-based access control.",
+      "files": [
+        "client/src/context/AuthContext.js",
+        "server/middleware/auth.middleware.js",
+        "server/controllers/auth.controller.js"
+      ]
+    },
+    {
+      "name": "Protected Routes",
+      "description": "Role-based route protection ensuring only authorized users (hospital or ambulance) can access their respective dashboards.",
+      "files": [
+        "client/src/components/common/ProtectedRoute.js",
+        "client/src/App.js"
+      ]
+    },
+    {
+      "name": "Statistics Dashboard",
+      "description": "System-wide statistics including hospital count, doctor count, and other metrics.",
+      "files": [
+        "server/controllers/stats.controller.js",
+        "client/src/pages/hospital/Dashboard.js",
+        "client/src/pages/ambulance/Dashboard.js"
+      ]
+    },
+    {
+      "name": "UI Components",
+      "description": "Reusable UI components including navigation bars, loaders, headers, footers, and error pages.",
+      "files": [
+        "client/src/components/common/Loader.js",
+        "client/src/components/common/BouncingBall.js",
+        "client/src/components/layout/Header.js",
+        "client/src/components/layout/Footer.js",
+        "client/src/pages/NotFound.js"
+      ]
+    },
+    {
+      "name": "Styling System",
+      "description": "Comprehensive CSS styling including glass-morphism UI, responsive design, dashboard enhancements, and improved text visibility.",
+      "files": [
+        "client/src/styles/main.css",
+        "client/src/styles/glass-ui.css",
+        "client/src/styles/designlab-framer.css",
+        "client/src/styles/dashboard-enhancements.css",
+        "client/src/styles/improved-visibility.css",
+        "client/src/styles/toast-styles.css",
+        "client/src/pages/ambulance/simple-dashboard.css",
+        "client/src/pages/ambulance/dashboard.css"
+      ]
+    },
+    {
+      "name": "API Services",
+      "description": "Centralized API configuration and service layer for making HTTP requests to the backend.",
+      "files": [
+        "client/src/services/api.js",
+        "client/src/utils/axiosConfig.js",
+        "client/src/utils/clientPortManager.js",
+        "client/src/services/mockData.js",
+        "client/src/services/mockAuth.js"
+      ]
+    },
+    {
+      "name": "Server Configuration",
+      "description": "Express server setup with CORS, middleware, routes, database connection, and error handling.",
+      "files": [
+        "server/server.js",
+        "server/config/db.js",
+        "server/routes/index.js",
+        "server/utils/errorHandler.js",
+        "server/utils/portManager.js"
+      ]
+    },
+    {
+      "name": "Database Models",
+      "description": "MongoDB models for hospitals, ambulances, doctors, emergencies, notifications, and users with schema definitions and methods.",
+      "files": [
+        "server/models/hospital.model.js",
+        "server/models/ambulance.model.js",
+        "server/models/doctor.model.js",
+        "server/models/emergency.model.js",
+        "server/models/notification.model.js",
+        "server/models/user.model.js"
+      ]
+    },
+    {
+      "name": "Route Handlers",
+      "description": "Express route handlers for authentication, hospitals, ambulances, doctors, emergencies, notifications, and stats.",
+      "files": [
+        "server/routes/auth.routes.js",
+        "server/routes/hospital.routes.js",
+        "server/routes/ambulance.routes.js",
+        "server/routes/doctor.routes.js",
+        "server/routes/emergency.routes.js",
+        "server/routes/notification.routes.js",
+        "server/routes/stats.routes.js",
+        "server/routes/health.routes.js"
+      ]
+    },
+    {
+      "name": "Page Routing",
+      "description": "React Router configuration for all application pages including public and protected routes.",
+      "files": [
+        "client/src/App.js",
+        "client/src/pages/Home.js",
+        "client/src/pages/RegisterSelection.js"
+      ]
+    }
+  ]
+}
+

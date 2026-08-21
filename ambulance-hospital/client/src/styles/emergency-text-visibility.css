@@ -1,0 +1,63 @@
+/* Emergency Requests Text Visibility Enhancement */
+
+/* Page title and subtitle */
+.emergency-requests h2 {
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.emergency-requests .text-muted {
+  color: #d1d5db !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Emergency request cards */
+.emergency-requests .card {
+  color: #ffffff;
+}
+
+.emergency-requests .card-header h5 {
+  color: #4e73df;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Section headings */
+.emergency-requests h6 {
+  color: #4e73df;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Field labels */
+.emergency-requests strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Field values */
+.emergency-requests p {
+  color: #e2e8f0;
+}
+
+/* Location information */
+.emergency-requests .location-info {
+  color: #e2e8f0;
+}
+
+/* Request time */
+.emergency-requests .request-time {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Status message */
+.emergency-requests .status-message {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Action buttons text */
+.emergency-requests .btn {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}

@@ -1,0 +1,43 @@
+/* Custom toast styles for the Justice Emergency Response System */
+
+/* Glass morphism toast container */
+.glass-toast {
+  background: rgba(15, 23, 42, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4) !important;
+  border-radius: 0.75rem !important;
+  padding: 0.75rem 1rem !important;
+  color: #ffffff !important;
+}
+
+/* Success toast icon */
+.glass-toast.Toastify__toast--success .Toastify__toast-icon {
+  color: var(--success, #10b981) !important;
+}
+
+/* Error toast icon */
+.glass-toast.Toastify__toast--error .Toastify__toast-icon {
+  color: var(--danger, #ef4444) !important;
+}
+
+/* Info toast icon */
+.glass-toast.Toastify__toast--info .Toastify__toast-icon {
+  color: var(--info, #3b82f6) !important;
+}
+
+/* Toast close button */
+.glass-toast .Toastify__close-button {
+  color: rgba(255, 255, 255, 0.7) !important;
+  opacity: 0.7;
+}
+
+.glass-toast .Toastify__close-button:hover {
+  color: #ffffff !important;
+  opacity: 1;
+}
+
+/* Toast progress bar (if shown) */
+.glass-toast .Toastify__progress-bar {
+  background: linear-gradient(to right, rgba(99, 102, 241, 0.7), rgba(168, 85, 247, 0.7)) !important;
+}

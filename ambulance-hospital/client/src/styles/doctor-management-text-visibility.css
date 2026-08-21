@@ -1,0 +1,69 @@
+/* Doctor Management Text Visibility Enhancement - Colors Only */
+
+/* Page title */
+.doctor-management-container h2 {
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Subtitle text */
+.doctor-management-container p.text-muted {
+  color: #d1d5db !important;
+}
+
+/* No doctors message */
+.doctor-management-container h4 {
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Doctor card header */
+.doctor-management-container .doctor-card .card-header h5 {
+  color: #4e73df;
+  font-weight: 600;
+}
+
+/* Doctor card body text */
+.doctor-management-container .doctor-card .card-body p {
+  color: #e2e8f0;
+}
+
+/* Doctor card labels */
+.doctor-management-container .doctor-card .card-body strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Doctor availability toggle label */
+.doctor-management-container .availability-toggle {
+  color: #ffffff;
+}
+
+/* Form labels */
+.doctor-management-container .form-label {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Modal titles */
+.modal-title {
+  color: #4e73df !important;
+  font-weight: 600;
+}
+
+/* Modal form labels */
+.modal-body .form-label {
+  color: #ffffff !important;
+}
+
+/* Modal form inputs */
+.modal-body .form-control {
+  color: #ffffff;
+  background-color: rgba(30, 41, 59, 0.8);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Emergency type badges */
+.doctor-management-container .badge {
+  color: #ffffff;
+}

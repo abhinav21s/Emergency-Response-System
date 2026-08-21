@@ -1,0 +1,16 @@
+import React, { useState } from 'react';
+import { Alert, Button, Card, Container, Form } from 'react-bootstrap';
+import { CircleMarker, MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+
+const apiUrl = process.env.REACT_APP_DISPATCH_API_URL || 'http://localhost:5000/api';
+const mapUrl = `https://api.tomtom.com/map/1/tile/basic/main/{z}/{x}/{y}.png?key=${process.env.REACT_APP_TOMTOM_API_KEY}`;
+function Picker({ onPick }) { useMapEvents({ click: (event) => onPick({ lat: event.latlng.lat, lng: event.latlng.lng }) }); return null; }
+
+export default function DispatchRegister() {
+  const [form, setForm] = useState({ name: '', driverName: '', vehicleNumber: '', type: 'public' }); const [location, setLocation] = useState(null); const [credentials, setCredentials] = useState(null); const [error, setError] = useState('');
+  const set = (event) => setForm({ ...form, [event.target.name]: event.target.value });
+  const currentLocation = () => navigator.geolocation?.getCurrentPosition(({ coords }) => setLocation({ lat: coords.latitude, lng: coords.longitude }), () => setError('Location permission was unavailable. Click the TomTom map to place the ambulance.')) || setError('Click the TomTom map to place the ambulance.');
+  const submit = async (event) => { event.preventDefault(); if (!location) return setError('Choose the ambulance location on the TomTom map.'); try { const response = await fetch(`${apiUrl}/ambulances`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, ...location }) }); const result = await response.json(); if (!response.ok) throw new Error(result.message); setCredentials(result.credentials); } catch (e) { setError(e.message); } };
+  return <Container className="py-4"><Card className="p-4"><h2>Register ambulance</h2><p>This creates the ambulance in the shared dispatcher fleet and pins its starting position on the TomTom map.</p>{error && <Alert variant="danger">{error}</Alert>}{credentials ? <Alert variant="success"><h4>Save driver credentials</h4><div>Ambulance ID: <b>{credentials.loginId}</b></div><div>Login code: <b>{credentials.loginCode}</b></div><p className="mb-0 mt-2">Use these at <code>/ambulance/dispatch</code>.</p></Alert> : <Form onSubmit={submit}><Form.Control className="mb-2" name="name" placeholder="Ambulance name" required onChange={set} /><Form.Control className="mb-2" name="driverName" placeholder="Driver name" required onChange={set} /><Form.Control className="mb-2" name="vehicleNumber" placeholder="Vehicle number" required onChange={set} /><Form.Select className="mb-2" name="type" onChange={set}><option value="public">Public 108</option><option value="private">Private</option></Form.Select><Button type="button" className="mb-3" variant="outline-primary" onClick={currentLocation}>Use current location</Button><MapContainer center={[12.9716, 77.5946]} zoom={12} style={{ height: 380 }}><TileLayer attribution="TomTom" url={mapUrl} /><Picker onPick={setLocation} />{location && <CircleMarker center={[location.lat, location.lng]} radius={10} pathOptions={{ color: '#e53935', fillOpacity: 1 }} />}</MapContainer>{location && <p className="mt-2">Selected: {location.lat.toFixed(5)}, {location.lng.toFixed(5)}</p>}<Button type="submit">Register shared ambulance</Button></Form>}</Card></Container>;
+}

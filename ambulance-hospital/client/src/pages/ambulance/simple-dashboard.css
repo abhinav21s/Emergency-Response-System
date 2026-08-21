@@ -1,0 +1,269 @@
+/* Main dashboard container */
+.dashboard-wrapper {
+  background: var(--glass-bg-darker);
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(30, 64, 175, 0.2) 0%, transparent 35%),
+    radial-gradient(circle at 90% 80%, rgba(37, 99, 235, 0.2) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
+    linear-gradient(to bottom, rgba(3, 4, 5, 0.9), rgba(5, 7, 9, 0.95));
+  background-attachment: fixed;
+  min-height: 100vh;
+  padding: 20px;
+  color: #5a5c69;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Grid layout for dashboard cards */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: auto auto;
+  gap: 20px;
+  grid-template-areas:
+    "server server server hosp hosp hosp select select select select select select"
+    "amb amb amb amb amb amb quick quick quick quick quick quick";
+}
+
+/* Card styling */
+.dashboard-card {
+  background-color: #1b2739;
+  border-radius: 10px;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Card header with icon */
+.card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+}
+
+.icon {
+  font-size: 20px;
+  color: white;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #4e73df;
+}
+
+/* Card content */
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Status description */
+.status-description,
+.count-description {
+  color: #6e707e;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+/* Detail rows */
+.detail-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.detail-icon {
+  color: #4e73df;
+  margin-right: 10px;
+  min-width: 16px;
+}
+
+.detail-label {
+  font-weight: 500;
+  margin-right: 5px;
+  color: #5a5c69;
+}
+
+.detail-value {
+  color: #3a3b45;
+  font-weight: 500;
+}
+
+/* Hospital details */
+.hospital-details {
+  margin-top: 10px;
+}
+
+.hospital-name {
+  color: #3a3b45;
+  margin-bottom: 15px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.specializations {
+  margin-top: 15px;
+}
+
+.specialization-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.specialization-badge {
+  font-size: 12px;
+}
+
+/* Ambulance details */
+.ambulance-details {
+  margin-top: 10px;
+}
+
+.emergency-info {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.emergency-info h4 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: #4e73df;
+  font-weight: 600;
+}
+
+.no-data {
+  color: #858796;
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* Server status card */
+.server-status {
+  grid-area: server;
+}
+
+.status-text {
+  color: #e74a3b;
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+/* Hospitals available card */
+.hospitals-available {
+  grid-area: hosp;
+}
+
+.count-text {
+  font-size: 32px;
+  font-weight: bold;
+  color: #4e73df;
+  margin-top: 10px;
+}
+
+/* Selected hospital card */
+.selected-hospital {
+  grid-area: select;
+}
+
+.select-hospital-btn {
+  margin-top: 20px;
+}
+
+/* Ambulance info card */
+.ambulance-info {
+  grid-area: amb;
+}
+
+/* Quick actions card */
+.quick-actions {
+  grid-area: quick;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Button styling */
+.action-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-icon {
+  margin-right: 10px;
+}
+
+.call-hospital {
+  background-color: #4e73df;
+  border-color: #4e73df;
+}
+
+.change-hospital {
+  background-color: #1cc88a;
+  border-color: #1cc88a;
+}
+
+.update-profile {
+  background-color: #36b9cc;
+  border-color: #36b9cc;
+}
+
+/* Icon box colors */
+.green {
+  background-color: #1cc88a;
+}
+
+.blue {
+  background-color: #4e73df;
+}
+
+.teal {
+  background-color: #36b9cc;
+}
+
+.red {
+  background-color: #e74a3b;
+}
+
+.yellow {
+  background-color: #f6c23e;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "server"
+      "hosp"
+      "select"
+      "amb"
+      "quick";
+  }
+}

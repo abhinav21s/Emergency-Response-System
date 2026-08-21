@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Emergency Notification</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, #020617 0%, #0f1c4d 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #e2e8f0;
+    }
+    .test-container {
+      background-color: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+      overflow: hidden;
+      width: 100%;
+      max-width: 600px;
+      padding: 30px;
+    }
+    .header {
+      color: white;
+      padding-bottom: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      margin-bottom: 25px;
+    }
+    h1 {
+      font-weight: 700;
+      font-size: 28px;
+      margin-bottom: 5px;
+      color: white;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    .form-group {
+      margin-bottom: 24px;
+    }
+    label {
+      font-weight: 500;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    .form-control {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 12px 15px;
+      border-radius: 8px;
+      background-color: rgba(255, 255, 255, 0.07);
+      color: white;
+      transition: all 0.3s ease;
+    }
+    .form-control:focus {
+      border-color: rgba(78, 115, 223, 0.5);
+      box-shadow: 0 0 15px rgba(78, 115, 223, 0.3);
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .btn-primary {
+      background: rgba(231, 74, 59, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border-radius: 8px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    .btn-primary:hover {
+      background: rgba(231, 74, 59, 0.95);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      transform: translateY(-2px);
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <div class="header">
+      <h1>Test Emergency Notification</h1>
+      <p>Use this page to test the emergency notification system</p>
+    </div>
+    <div class="body">
+      <form id="testForm">
+        <div class="form-group">
+          <label for="hospitalId">Hospital ID</label>
+          <input type="text" class="form-control" id="hospitalId" required placeholder="Enter hospital ID">
+        </div>
+        <div class="form-group">
+          <label for="ambulanceName">Ambulance Name</label>
+          <input type="text" class="form-control" id="ambulanceName" required placeholder="Enter ambulance name">
+        </div>
+        <div class="form-group">
+          <label for="emergencyType">Emergency Type</label>
+          <select class="form-control" id="emergencyType">
+            <option value="Ambulance Arrival">Ambulance Arrival</option>
+            <option value="Medical Emergency">Medical Emergency</option>
+            <option value="Trauma">Trauma</option>
+            <option value="Cardiac">Cardiac</option>
+            <option value="Respiratory">Respiratory</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="severity">Severity</label>
+          <select class="form-control" id="severity">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea class="form-control" id="message" rows="3" placeholder="Enter emergency message"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Send Test Notification</button>
+      </form>
+      <div id="result" class="result" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get form and result elements
+      const form = document.getElementById('testForm');
+      const result = document.getElementById('result');
+      
+      // Handle form submission
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Get form values
+        const hospitalId = document.getElementById('hospitalId').value;
+        const ambulanceName = document.getElementById('ambulanceName').value;
+        const emergencyType = document.getElementById('emergencyType').value;
+        const severity = document.getElementById('severity').value;
+        const message = document.getElementById('message').value || 'Test emergency notification';
+        
+        // Create notification data
+        const notificationData = {
+          hospitalId: hospitalId,
+          ambulanceName: ambulanceName,
+          emergency: {
+            _id: 'test-' + Date.now(),
+            emergencyType: emergencyType,
+            severity: severity,
+            status: 'Requested',
+            notes: message,
+            hospital: hospitalId,
+            createdAt: new Date().toISOString()
+          },
+          message: message
+        };
+        
+        // Connect to socket server
+        const socket = io('http://localhost:5001', {
+          transports: ['websocket', 'polling']
+        });
+        
+        // Handle connection
+        socket.on('connect', function() {
+          console.log('Connected to socket server');
+          
+          // Emit test notification
+          socket.emit('ambulance:request', notificationData);
+          
+          // Show success message
+          result.innerHTML = `
+            <h4 style="color: #1cc88a;">Notification Sent!</h4>
+            <p>A test notification has been sent to the hospital with ID: ${hospitalId}</p>
+            <pre style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; color: #e2e8f0; overflow: auto;">${JSON.stringify(notificationData, null, 2)}</pre>
+          `;
+          result.style.display = 'block';
+          
+          // Disconnect after sending
+          setTimeout(() => {
+            socket.disconnect();
+          }, 2000);
+        });
+        
+        // Handle connection error
+        socket.on('connect_error', function(error) {
+          console.error('Connection error:', error);
+          result.innerHTML = `
+            <h4 style="color: #e74a3b;">Connection Error</h4>
+            <p>Failed to connect to the socket server: ${error.message}</p>
+          `;
+          result.style.display = 'block';
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,566 @@
+/* DesignLab Framer Style CSS - Justice Emergency Response System */
+
+:root {
+  /* Core Colors */
+  --designlab-bg: #000a1f; /* Premium blackish-blue background */
+  --designlab-card: #051124; /* Slightly lighter blackish-blue for cards */
+  --designlab-card-hover: #0a1a36; /* Hover state with more blue tint */
+  --designlab-accent: #4f8dff; /* Brighter blue accent */
+  --designlab-accent-hover: #3a7dff;
+  --designlab-text: #ffffff;
+  --designlab-text-secondary: rgba(255, 255, 255, 0.9); /* Improved text visibility */
+  --designlab-text-muted: rgba(255, 255, 255, 0.75); /* Improved text visibility */
+  --designlab-border: rgba(79, 141, 255, 0.15); /* Bluish border */
+  
+  /* Gradients */
+  --designlab-gradient-blue: linear-gradient(135deg, #4f8dff, #2563eb);
+  --designlab-gradient-purple: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  --designlab-gradient-success: linear-gradient(135deg, #10b981, #059669);
+  --designlab-gradient-danger: linear-gradient(135deg, #ef4444, #dc2626);
+  
+  /* Shadows */
+  --designlab-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --designlab-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --designlab-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --designlab-shadow-blue: 0 0 20px rgba(59, 130, 246, 0.5);
+  
+  /* Spacing */
+  --designlab-space-xs: 0.5rem;
+  --designlab-space-sm: 1rem;
+  --designlab-space-md: 1.5rem;
+  --designlab-space-lg: 2rem;
+  --designlab-space-xl: 3rem;
+  
+  /* Border Radius */
+  --designlab-radius-sm: 0.5rem;
+  --designlab-radius-md: 0.75rem;
+  --designlab-radius-lg: 1rem;
+  --designlab-radius-xl: 1.5rem;
+  --designlab-radius-full: 9999px;
+}
+
+/* Base Styles */
+body {
+  background-color: var(--designlab-bg);
+  background-image: radial-gradient(circle at 10% 10%, #051a3f 0%, var(--designlab-bg) 70%); /* Premium blackish-blue radial gradient */
+  color: var(--designlab-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: var(--designlab-space-sm);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--designlab-text);
+}
+
+h1 {
+  font-size: 3.5rem;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 2.5rem;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: 2rem;
+}
+
+h4 {
+  font-size: 1.5rem;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: var(--designlab-space-md);
+  color: var(--designlab-text-secondary);
+}
+
+/* Cards */
+.designlab-card {
+  background-color: var(--designlab-card);
+  background-image: linear-gradient(160deg, rgba(79, 141, 255, 0.05) 0%, rgba(0, 0, 0, 0) 100%); /* Enhanced gradient overlay */
+  border-radius: var(--designlab-radius-lg);
+  padding: var(--designlab-space-lg);
+  margin-bottom: var(--designlab-space-lg);
+  box-shadow: var(--designlab-shadow-md), 0 0 30px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+  transition: all 0.3s ease;
+  border: 1px solid var(--designlab-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.designlab-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--designlab-shadow-lg);
+  background-color: var(--designlab-card-hover);
+}
+
+.designlab-card-accent {
+  position: relative;
+}
+
+.designlab-card-accent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--designlab-gradient-blue);
+  border-radius: var(--designlab-radius-sm) 0 0 var(--designlab-radius-sm);
+}
+
+.designlab-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: var(--designlab-space-sm);
+  color: var(--designlab-text);
+}
+
+.designlab-card-subtitle {
+  font-size: 1rem;
+  color: var(--designlab-text-secondary);
+  margin-bottom: var(--designlab-space-md);
+}
+
+/* Buttons */
+.designlab-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--designlab-radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  outline: none;
+  text-decoration: none;
+  gap: 0.5rem;
+}
+
+.designlab-button-primary {
+  background: var(--designlab-gradient-blue);
+  color: white;
+  box-shadow: var(--designlab-shadow-sm);
+}
+
+.designlab-button-primary:hover {
+  box-shadow: var(--designlab-shadow-blue);
+  transform: translateY(-2px);
+}
+
+.designlab-button-secondary {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--designlab-accent);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.designlab-button-secondary:hover {
+  background-color: rgba(59, 130, 246, 0.2);
+  transform: translateY(-2px);
+}
+
+.designlab-button-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Form Controls */
+.designlab-input {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--designlab-border);
+  border-radius: var(--designlab-radius-md);
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  color: var(--designlab-text);
+  width: 100%;
+  transition: all 0.3s ease;
+  margin-bottom: var(--designlab-space-md);
+}
+
+.designlab-input:focus {
+  outline: none;
+  border-color: var(--designlab-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+.designlab-input::placeholder {
+  color: var(--designlab-text-muted);
+}
+
+.designlab-label {
+  display: block;
+  margin-bottom: var(--designlab-space-xs);
+  font-weight: 500;
+  color: var(--designlab-text-secondary);
+}
+
+/* Hero Section */
+.designlab-hero {
+  padding: var(--designlab-space-xl) 0;
+  position: relative;
+  background-image: radial-gradient(circle at 70% 30%, rgba(79, 141, 255, 0.1) 0%, rgba(0, 0, 0, 0) 50%); /* Premium hero background */
+}
+
+.designlab-hero-title {
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: var(--designlab-space-md);
+  background: linear-gradient(to right, white, #93c5fd, #4f8dff); /* Enhanced gradient text */
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.03em;
+  text-shadow: 0 5px 30px rgba(79, 141, 255, 0.2); /* Subtle text glow */
+}
+
+.designlab-hero-subtitle {
+  font-size: 1.25rem;
+  color: var(--designlab-text-secondary);
+  margin-bottom: var(--designlab-space-lg);
+  max-width: 600px;
+}
+
+/* Feature Cards */
+.designlab-feature-card {
+  padding: var(--designlab-space-lg);
+  border-radius: var(--designlab-radius-lg);
+  background-color: var(--designlab-card);
+  border: 1px solid var(--designlab-border);
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.designlab-feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--designlab-shadow-lg);
+  background-color: var(--designlab-card-hover);
+}
+
+.designlab-feature-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--designlab-radius-md);
+  background: var(--designlab-gradient-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--designlab-space-md);
+  color: white;
+  font-size: 1.5rem;
+}
+
+.designlab-feature-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: var(--designlab-space-sm);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.designlab-feature-description {
+  color: var(--designlab-text-secondary);
+  margin-bottom: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Stats Cards */
+.designlab-stat-card {
+  padding: var(--designlab-space-lg);
+  border-radius: var(--designlab-radius-lg);
+  background-color: var(--designlab-card);
+  border: 1px solid var(--designlab-border);
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.designlab-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--designlab-shadow-lg);
+  background-color: var(--designlab-card-hover);
+}
+
+.designlab-stat-value {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: var(--designlab-space-xs);
+  background: var(--designlab-gradient-blue);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.designlab-stat-label {
+  color: var(--designlab-text-secondary);
+  font-weight: 500;
+}
+
+/* Navbar */
+.designlab-navbar {
+  padding: var(--designlab-space-md) 0;
+  background-color: rgba(15, 15, 16, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--designlab-border);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.designlab-navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--designlab-text);
+  text-decoration: none;
+}
+
+.designlab-navbar-nav {
+  display: flex;
+  gap: var(--designlab-space-md);
+}
+
+.designlab-nav-link {
+  color: var(--designlab-text-secondary);
+  text-decoration: none;
+  transition: color 0.3s ease;
+  font-weight: 500;
+}
+
+.designlab-nav-link:hover,
+.designlab-nav-link.active {
+  color: var(--designlab-text);
+}
+
+/* Sections */
+.designlab-section {
+  padding: var(--designlab-space-xl) 0;
+}
+
+.designlab-section-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: var(--designlab-space-md);
+  color: var(--designlab-text);
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.designlab-section-subtitle {
+  font-size: 1.25rem;
+  color: var(--designlab-text-secondary);
+  margin-bottom: var(--designlab-space-xl);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Dashboard Components */
+.designlab-dashboard-card {
+  padding: var(--designlab-space-lg);
+  border-radius: var(--designlab-radius-lg);
+  background-color: var(--designlab-card);
+  border: 1px solid var(--designlab-border);
+  margin-bottom: var(--designlab-space-md);
+}
+
+.designlab-dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--designlab-space-md);
+}
+
+.designlab-dashboard-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.designlab-dashboard-value {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: var(--designlab-space-xs);
+}
+
+.designlab-dashboard-label {
+  color: var(--designlab-text-secondary);
+  font-size: 0.875rem;
+}
+
+/* Alerts */
+.designlab-alert {
+  padding: var(--designlab-space-md);
+  border-radius: var(--designlab-radius-md);
+  margin-bottom: var(--designlab-space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--designlab-space-sm);
+}
+
+.designlab-alert-success {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-left: 4px solid #10b981;
+}
+
+.designlab-alert-danger {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-left: 4px solid #ef4444;
+}
+
+.designlab-alert-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-left: 4px solid #f59e0b;
+}
+
+.designlab-alert-info {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-left: 4px solid #3b82f6;
+}
+
+/* Badges */
+.designlab-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--designlab-radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.designlab-badge-primary {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.designlab-badge-success {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.designlab-badge-danger {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.designlab-badge-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+/* Tables */
+.designlab-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: var(--designlab-space-lg);
+}
+
+.designlab-table th,
+.designlab-table td {
+  padding: var(--designlab-space-md);
+  text-align: left;
+}
+
+.designlab-table th {
+  font-weight: 600;
+  color: var(--designlab-text-secondary);
+  border-bottom: 1px solid var(--designlab-border);
+}
+
+.designlab-table td {
+  border-bottom: 1px solid var(--designlab-border);
+}
+
+.designlab-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.designlab-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.designlab-slide-up {
+  animation: slideUp 0.5s ease forwards;
+}
+
+/* Responsive Utilities */
+@media (max-width: 992px) {
+  .designlab-hero-title {
+    font-size: 3rem;
+  }
+  
+  .designlab-section-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .designlab-hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .designlab-hero-subtitle {
+    font-size: 1.125rem;
+  }
+  
+  .designlab-section-title {
+    font-size: 1.75rem;
+  }
+}
+
+/* Bootstrap Overrides */
+.card {
+  background-color: var(--designlab-card) !important;
+  border: 1px solid var(--designlab-border) !important;
+  border-radius: var(--designlab-radius-lg) !important;
+}
+
+.btn-primary {
+  background: var(--designlab-gradient-blue) !important;
+  border: none !important;
+}
+
+.form-control {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid var(--designlab-border) !important;
+  color: var(--designlab-text) !important;
+}
+
+.form-control:focus {
+  border-color: var(--designlab-accent) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+}
+
+.nav-link {
+  color: var(--designlab-text-secondary) !important;
+}
+
+.nav-link:hover, 
+.nav-link.active {
+  color: var(--designlab-text) !important;
+}

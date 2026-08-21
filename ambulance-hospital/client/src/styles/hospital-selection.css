@@ -1,0 +1,78 @@
+/* Hospital Selection Styling */
+.hospital-item {
+  position: relative;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.hospital-item.selected-hospital {
+  background: rgba(78, 115, 223, 0.15);
+  border-left: 3px solid #4e73df;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.selected-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  color: #4e73df;
+  animation: pulse-blue 2s infinite;
+}
+
+.selected-indicator i {
+  font-size: 14px;
+}
+
+@keyframes pulse-blue {
+  0% {
+    text-shadow: 0 0 0 rgba(78, 115, 223, 0.7);
+  }
+  70% {
+    text-shadow: 0 0 10px rgba(78, 115, 223, 0);
+  }
+  100% {
+    text-shadow: 0 0 0 rgba(78, 115, 223, 0);
+  }
+}
+
+.clear-selection-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(231, 74, 59, 0.1);
+  color: #e74a3b;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.clear-selection-btn:hover {
+  background: rgba(231, 74, 59, 0.2);
+}
+
+.clear-selection-btn i {
+  font-size: 10px;
+}
+
+.hospital-selection-info {
+  background: rgba(78, 115, 223, 0.1);
+  border-left: 3px solid #4e73df;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #e2e8f0;
+}
+
+.hospital-selection-info i {
+  color: #4e73df;
+  margin-right: 5px;
+}

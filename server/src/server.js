@@ -268,7 +268,7 @@ app.use((error, _req, res, _next) => {
 
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/ambulance_demo')
   .then(async () => {
-    await seedAmbulances();
+    await seedAmbulances(true);
     await seedHospitals();
     server.listen(port, () => console.log(`API ready at http://localhost:${port}`));
   })

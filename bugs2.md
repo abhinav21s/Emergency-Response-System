@@ -1,72 +1,50 @@
-# Unified Emergency Response & Real-Time Hospital Network
+# Complete System Guide & Real-Time Hospital Network
 
-## Completed Implementations & Upgrades
+## Summary of All Completed Upgrades
 
-### 1. Real-Time Hospital Network with Specialty Routing & Live Capacity
-- **Model Upgrades ([Hospital.js](file:///c:/Users/abhin/Desktop/ALLFOLDER/projects/public-private_ambulance/server/src/models/Hospital.js))**:
-  - `specialties`: `['Trauma & Emergency', 'Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics', 'ICU Care', 'Burns & Plastic']`
-  - `beds`: `{ emergency: Number, icu: Number, total: Number }`
-  - `doctorsOnDuty`: Number of specialists actively on shift
-  - `traumaLevel`: E.g., *Level 1 Major Trauma*, *Level 1 Cardiac Emergency*, *Level 1 Neuro Trauma*
-  - `accepting`: Real-time diversion toggle (`true` / `false`)
+### 1. Interactive TomTom Map & Name Autocomplete in Hospital Portal (`:5173/hospital-portal`)
+- Added a live **Hospital Name Autocomplete Search** and an **Interactive TomTom Map Picker** directly inside the "➕ Add New" hospital form.
+- Typing a hospital name (e.g. *Manipal Hospital, Apollo, Fortis*) automatically fetches coordinates, positions the pin on the TomTom map, and sets the address.
+- Users can click anywhere on the TomTom map to place or reposition the hospital pin, automatically updating latitude and longitude.
 
-- **Pre-Seeded 12+ Major Hospitals in Bangalore ([seedHospitals.js](file:///c:/Users/abhin/Desktop/ALLFOLDER/projects/public-private_ambulance/server/src/seedHospitals.js))**:
-  1. *Victoria Hospital (Trauma Care Centre)* — Fort / City Market
-  2. *NIMHANS (Neuro Emergency Centre)* — Hosur Road
-  3. *Manipal Hospital* — Old Airport Road
-  4. *Apollo Hospital* — Bannerghatta Road
-  5. *Fortis Hospital* — Cunningham Road
-  6. *St. John's Medical College Hospital* — Koramangala
-  7. *Sri Jayadeva Institute of Cardiovascular Sciences* — Jayanagar
-  8. *Bowring & Lady Curzon Hospital* — Shivajinagar
-  9. *Aster CMI Hospital* — Hebbal / Airport Road
-  10. *Sakra World Hospital* — Marathahalli-Bellandur ORR
-  11. *Narayana Health City* — Hosur Road / Bommasandra
-  12. *St. Martha's Hospital* — Nrupathunga Road
+### 2. TomTom Map Tile Layer on Port 3000 (`:3000/hospital/register`)
+- Replaced the OpenStreetMap tiles in `ambulance-hospital/client/src/pages/hospital/Register.js` with **TomTom Map Tiles** using the TomTom API key.
+- Now both applications (Port 5173 and Port 3000) render identical vector/raster maps using TomTom.
 
-- **Live Hospital Capacity Portal ([HospitalPortal.jsx](file:///c:/Users/abhin/Desktop/ALLFOLDER/projects/public-private_ambulance/client/src/pages/HospitalPortal.jsx))**:
-  - Route: **`http://localhost:5173/hospital-portal`**
-  - Instant `+` / `-` adjustment for **Emergency Beds**, **ICU Beds**, and **On-Duty Doctors**.
-  - Toggle active specialties on the current shift.
-  - One-click Emergency Diversion toggle (`🟢 Accepting Emergencies` vs `🔴 On Diversion`).
-  - Emits real-time `hospital:updated` events over Socket.io so every driver and dispatcher map screen updates live without refreshing.
+### 3. Cross-Service Registration Sync (Port 3000 $\rightarrow$ Port 5173)
+- When a hospital is registered on **Port 3000** (`/hospital/register`), the backend (`auth.controller.js`) automatically registers and syncs the hospital with the **Port 5000 dispatch network**.
+- **Result**: Any hospital added on Port 3000 immediately appears on the **Port 5173 Command Map and Driver Screen**.
 
-- **Driver View Specialty Routing & Interactive Map ([Driver.jsx](file:///c:/Users/abhin/Desktop/ALLFOLDER/projects/public-private_ambulance/client/src/pages/Driver.jsx))**:
-  - Mini-map preview showing the accident scene and surrounding hospitals with pins.
-  - **Specialty Filter Chips**: `[ All ]`, `[ ❤️ Cardiology ]`, `[ 🧠 Neurology ]`, `[ 🚨 Trauma Care ]`, `[ 👶 Pediatrics ]`, `[ 🦴 Orthopedics ]`, `[ 🫁 ICU Available ]`.
-  - Detailed capacity badges: Emergency beds free, ICU beds free, doctors on duty, and distance from accident.
+### 4. Real-Time Incoming Patient Emergency Alerts
+- When a 108 ambulance reaches the accident spot and selects a destination hospital, the server emits `hospital:incoming-patient` over Socket.io.
+- The **Hospital Portal** on Port 5173 (and hospital dashboard) receives the alert in real time and displays an **Incoming Emergency Patient Alert Banner** showing:
+  - 🚨 Ambulance Name (e.g. *108 Alpha*)
+  - 👨‍⚕️ Driver on duty
+  - ⏱️ Live ETA (e.g. *ETA: 5 mins*) and distance
+  - **Acknowledge & Prepare ER Team** action button.
 
-- **Main Dispatcher Command Map ([MapPage.jsx](file:///c:/Users/abhin/Desktop/ALLFOLDER/projects/public-private_ambulance/client/src/pages/MapPage.jsx))**:
-  - Displays registered hospitals alongside fleet ambulances.
-  - Clickable hospital pins with popups showing trauma level, bed count, and available specialties.
-  - Map layer toggles for `[x] Fleet` and `[x] Hospitals`.
+### 5. TomTom Real-Time Traffic & Routing Calculation
+- Traffic calculations make live requests directly to the **official TomTom Routing & Traffic API**:
+  `https://api.tomtom.com/routing/1/calculateRoute/...&traffic=true&maxAlternatives=2`
+- TomTom computes:
+  - Turn-by-turn road length in meters (`lengthInMeters`)
+  - Real-time travel time accounting for street congestion (`travelTimeInSeconds`)
+  - Delay caused by traffic jams (`trafficDelayInSeconds`)
+  - Accurate GPS road polylines following streets and turns (`geometry`).
 
 ---
 
-### 2. Simplified Driver & Ambulance Experience (No IDs or Passwords)
-- **1-Click Ambulance Selection ([Driver.jsx](file:///c:/Users/abhin/Desktop/ALLFOLDER/projects/public-private_ambulance/client/src/pages/Driver.jsx))**:
-  - Removed login codes and ambulance ID inputs. Drivers simply click on their vehicle card to start receiving dispatch alerts.
-- **Streamlined Ambulance Registration ([AddAmbulance.jsx](file:///c:/Users/abhin/Desktop/ALLFOLDER/projects/public-private_ambulance/client/src/pages/AddAmbulance.jsx))**:
-  - Saving an ambulance navigates directly to the map.
-
-### 3. TomTom 3 Alternate Routes with Traffic & ETA
-- **Route Calculation ([server.js](file:///c:/Users/abhin/Desktop/ALLFOLDER/projects/public-private_ambulance/server/src/server.js) & [RoutePicker.jsx](file:///c:/Users/abhin/Desktop/ALLFOLDER/projects/public-private_ambulance/client/src/components/RoutePicker.jsx))**:
-  - Computes 3 alternate routes with live traffic, duration, and distance.
-  - Includes retry recovery and geometric road fallback.
-
----
-
-## How to Test the New Real-Time Features
+## 🚀 How to Test the Entire Ecosystem
 
 1. **Open Command Map**: `http://localhost:5173/map`
-   - See all 12+ pre-seeded hospitals across Bangalore on the map.
-2. **Open Hospital Portal in another tab**: `http://localhost:5173/hospital-portal`
-   - Pick *Manipal Hospital* or *Victoria Hospital*.
-   - Click `+` on ICU beds or toggle a specialty like *Cardiology*.
-3. **Open Driver View**: `http://localhost:5173/driver`
-   - Pick any ambulance (e.g. `108 Alpha`).
-4. **Trigger an Accident Dispatch from Map**:
-   - Click **"Report Accident / Call 108"**.
-   - In Driver tab, accept the call $\rightarrow$ Pick a route $\rightarrow$ Click **"I've Arrived at Accident"**.
-   - Notice the rich hospital cards sorted by proximity with Specialty Filter Chips!
-   - Now change ICU beds in the Hospital Portal tab and watch the Driver's hospital card **update live in real time via Socket.io!**
+   - See all 12+ pre-seeded hospitals across Bangalore on the TomTom map.
+2. **Open Hospital Portal**: `http://localhost:5173/hospital-portal`
+   - Click **➕ Add New** $\rightarrow$ Search or click the TomTom map to place a new hospital!
+   - Adjust ICU beds / Emergency beds live and watch the driver view update in real time.
+3. **Register on Port 3000**: `http://localhost:3000/hospital/register`
+   - Register a hospital using the TomTom map $\rightarrow$ It immediately syncs and appears on the 5173 map!
+4. **Open Driver View**: `http://localhost:5173/driver`
+   - 1-click select `108 Alpha`.
+   - Dispatch from `/map` $\rightarrow$ Accept call $\rightarrow$ Pick TomTom route $\rightarrow$ Click **"I've Arrived at Accident"**.
+   - Use **Specialty Filter Chips** (e.g., *❤️ Cardiology*, *🫁 ICU Available*).
+   - Select a hospital $\rightarrow$ Notice the live **Incoming Emergency Patient Alert Banner** pop up on the Hospital Portal!

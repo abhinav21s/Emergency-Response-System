@@ -9,6 +9,7 @@ const doctorRoutes = require('./doctor.routes');
 const emergencyRoutes = require('./emergency.routes');
 const statsRoutes = require('./stats.routes');
 const notificationRoutes = require('./notification.routes');
+const bridgeRoutes = require('./bridge.routes');
 
 // Mount routes
 router.use('/auth', authRoutes);
@@ -18,6 +19,7 @@ router.use('/doctors', doctorRoutes);
 router.use('/emergencies', emergencyRoutes);
 router.use('/stats', statsRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/bridge', bridgeRoutes);
 
 // Health check route
 router.get('/health', (req, res) => {

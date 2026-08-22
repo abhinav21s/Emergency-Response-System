@@ -87,19 +87,18 @@ export const SocketProvider = ({ children }) => {
     }
   };
 
-  // Function to listen for events
+  // Function to listen for events — properly tracks the wrapper so cleanup actually works
   const onEvent = (event, callback) => {
     if (socket) {
-      console.log(`Listening for event: ${event}`);
-      socket.on(event, (data) => {
-        console.log(`Received event: ${event}`, data);
+      // Store wrapper so we can remove the exact same reference
+      const wrapper = (data) => {
         callback(data);
-      });
+      };
+      socket.on(event, wrapper);
       
-      // Return cleanup function
+      // Return cleanup that removes the wrapper, not the original callback
       return () => {
-        console.log(`Removing listener for event: ${event}`);
-        socket.off(event, callback);
+        socket.off(event, wrapper);
       };
     }
     

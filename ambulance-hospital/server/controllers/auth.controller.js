@@ -21,7 +21,11 @@ exports.register = {
         phone,
         hospitalName,
         address,
-        location
+        location,
+        beds,
+        traumaLevel,
+        specialties,
+        doctorsOnDuty
       } = req.body;
 
       // Check if hospital already exists
@@ -29,6 +33,12 @@ exports.register = {
       if (existingHospital) {
         return res.status(400).json({ message: 'Hospital already exists with this email' });
       }
+
+      const initialBeds = beds || { emergency: 14, icu: 6, total: 60 };
+      const initialTrauma = traumaLevel || 'Level 1 Multi-Specialty';
+      const initialSpecialties = Array.isArray(specialties)
+        ? specialties
+        : ['Trauma & Emergency', 'General Surgery', 'ICU Care', 'Cardiology'];
 
       // Create new hospital
       const hospital = await Hospital.create({
@@ -39,11 +49,38 @@ exports.register = {
         role: 'hospital',
         hospitalName,
         address,
-        location
+        location,
+        beds: initialBeds,
+        traumaLevel: initialTrauma,
+        specialties: initialSpecialties,
+        accepting: true
       });
 
       // Generate token
       const token = generateToken(hospital._id);
+
+      // Cross-sync to Port 5000 dispatch network
+      try {
+        const dispatchLat = location?.coordinates?.[1] || 12.9716;
+        const dispatchLng = location?.coordinates?.[0] || 77.5946;
+        await fetch('http://localhost:5000/api/hospitals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: hospitalName || name,
+            lat: dispatchLat,
+            lng: dispatchLng,
+            phone: phone || '',
+            traumaLevel: initialTrauma,
+            specialties: initialSpecialties,
+            beds: initialBeds,
+            doctorsOnDuty: doctorsOnDuty || 8
+          })
+        });
+      } catch (syncErr) {
+        console.warn('Cross-service sync notice:', syncErr.message);
+      }
+
 
       res.status(201).json({
         _id: hospital._id,

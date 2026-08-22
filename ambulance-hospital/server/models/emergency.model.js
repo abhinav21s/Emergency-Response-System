@@ -4,12 +4,12 @@ const emergencySchema = new mongoose.Schema({
   ambulance: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false
   },
   hospital: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false
   },
   // Added top-level gender field for emergency notifications
   gender: {
@@ -39,19 +39,21 @@ const emergencySchema = new mongoose.Schema({
   patient: {
     name: {
       type: String,
-      trim: true
+      trim: true,
+      default: 'Emergency Patient'
     },
     age: {
       type: Number
     },
     gender: {
       type: String,
-      enum: ['Male', 'Female', 'Other']
+      trim: true,
+      default: 'Unknown'
     },
     condition: {
       type: String,
       trim: true,
-      default: 'Unknown'
+      default: 'Critical'
     },
     vitalSigns: {
       bloodPressure: String,

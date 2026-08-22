@@ -1,15 +1,13 @@
-import React, { useState, useContext, useEffect, useRef } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import { Container, Row, Col, Form, Button, Alert, Card, Spinner } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import { FaHospital, FaEnvelope, FaLock, FaUser, FaPhone, FaMapMarkerAlt, FaCheckCircle, FaSearch } from 'react-icons/fa';
+import { FaHospital, FaEnvelope, FaLock, FaUser, FaPhone, FaMapMarkerAlt, FaCheckCircle, FaSearch, FaBed } from 'react-icons/fa';
 import { AuthContext } from '../../context/AuthContext';
-import Loader from '../../components/common/Loader';
 import 'leaflet/dist/leaflet.css';
 import '../../styles/register.css';
 
-// Fix Leaflet default marker icon
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon-2x.png',
@@ -18,17 +16,16 @@ L.Icon.Default.mergeOptions({
 });
 
 const hospitalPinIcon = L.divIcon({
-  className: 'custom-hospital-marker',
-  html: `<div style="background:#dc2626;color:white;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 3px 8px rgba(0,0,0,0.3);border:2px solid white;">🏥</div>`,
-  iconSize: [34, 34],
-  iconAnchor: [17, 34],
-  popupAnchor: [0, -34]
+  className: '',
+  html: `<div style="background:#1359bd;color:white;border-radius:6px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;box-shadow:0 3px 8px rgba(0,0,0,0.35);border:2px solid white;">H</div>`,
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32]
 });
 
-// Component to dynamically recenter map
 function MapUpdater({ center }) {
   const map = useMap();
-  useEffect(() => {
+  React.useEffect(() => {
     if (center) {
       map.flyTo(center, 14, { duration: 1.2 });
     }
@@ -36,7 +33,6 @@ function MapUpdater({ center }) {
   return null;
 }
 
-// Component to handle map clicks to adjust pin
 function MapClickHandler({ onLocationSelect }) {
   useMapEvents({
     click: (e) => {
@@ -54,6 +50,11 @@ const HospitalRegister = () => {
     name: '',
     phone: '',
     hospitalName: '',
+    traumaLevel: 'Level 1 Multi-Specialty',
+    emergencyBeds: 14,
+    icuBeds: 6,
+    doctorsOnDuty: 8,
+    specialties: 'Trauma & Emergency, Cardiology, ICU Care, General Surgery',
     address: {
       street: '',
       city: 'Bangalore',
@@ -74,13 +75,11 @@ const HospitalRegister = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState('');
-  const [registrationComplete, setRegistrationComplete] = useState(false);
   
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
   const searchTimeoutRef = useRef(null);
 
-  // Search hospitals using Nominatim / OpenStreetMap
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -99,25 +98,34 @@ const HospitalRegister = () => {
       return;
     }
 
+    setIsSearching(true);
     searchTimeoutRef.current = setTimeout(async () => {
-      setIsSearching(true);
       try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ' hospital Bangalore')}&limit=5&addressdetails=1`
-        );
-        const data = await response.json();
-        if (data && data.length > 0) {
-          setSearchResults(data);
+        const tomtomKey = process.env.REACT_APP_TOMTOM_API_KEY || 'YiM8ZHJlnpK4TezEC0VhMMKhd7FqnJ42';
+        const url = `https://api.tomtom.com/search/2/search/${encodeURIComponent(query)}.json?key=${tomtomKey}&lat=12.9716&lon=77.5946&radius=50000&limit=5`;
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        if (data.results && data.results.length > 0) {
+          const mapped = data.results.map(r => ({
+            name: r.poi?.name || r.address?.freeformAddress || query,
+            display_name: r.address?.freeformAddress || r.poi?.name || query,
+            lat: r.position?.lat,
+            lng: r.position?.lon,
+            address: {
+              street: r.address?.streetName || r.address?.freeformAddress || '',
+              city: r.address?.municipality || 'Bangalore',
+              state: r.address?.countrySubdivision || 'Karnataka',
+              zipCode: r.address?.postalCode || '560001',
+              country: 'India'
+            }
+          }));
+          setSearchResults(mapped);
         } else {
-          // Fallback search without "hospital" keyword
-          const fallbackRes = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ' Bangalore')}&limit=5&addressdetails=1`
-          );
-          const fallbackData = await fallbackRes.json();
-          setSearchResults(fallbackData || []);
+          setSearchResults([]);
         }
       } catch (err) {
-        console.error('Error fetching hospital suggestions:', err);
+        console.warn('Search error:', err);
       } finally {
         setIsSearching(false);
       }
@@ -126,32 +134,23 @@ const HospitalRegister = () => {
 
   const selectHospitalLocation = (place) => {
     const lat = parseFloat(place.lat);
-    const lon = parseFloat(place.lon);
-    const displayName = place.name || place.display_name.split(',')[0];
-    const street = place.address?.road || place.address?.suburb || place.display_name.split(',').slice(0, 2).join(', ');
-    const city = place.address?.city || place.address?.town || place.address?.county || 'Bangalore';
-    const state = place.address?.state || 'Karnataka';
-    const zipCode = place.address?.postcode || '560001';
-
+    const lng = parseFloat(place.lng);
+    
     setFormData(prev => ({
       ...prev,
-      hospitalName: displayName,
+      hospitalName: place.name || prev.hospitalName,
       address: {
-        street,
-        city,
-        state,
-        zipCode,
-        country: 'India'
+        ...prev.address,
+        ...place.address
       },
       location: {
         type: 'Point',
-        coordinates: [lon, lat]
+        coordinates: [lng, lat]
       }
     }));
-
-    setSearchQuery(displayName);
+    
+    setSearchQuery(place.name || place.display_name.split(',')[0]);
     setSearchResults([]);
-    setErrors(prev => ({ ...prev, hospitalName: null }));
   };
 
   const handleMapPinClick = (lat, lng) => {
@@ -166,7 +165,19 @@ const HospitalRegister = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      setFormData(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: null }));
     }
@@ -175,40 +186,33 @@ const HospitalRegister = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Hospital Name validation
     if (!formData.hospitalName.trim()) {
-      newErrors.hospitalName = 'Please enter or search for your hospital name.';
+      newErrors.hospitalName = 'Hospital name is required.';
     }
 
-    // Name validation
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required.';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email address is invalid.';
+    }
+
     if (!formData.name.trim()) {
       newErrors.name = 'Contact person name is required.';
     }
 
-    // Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email address is required.';
-    } else if (!emailRegex.test(formData.email.trim())) {
-      newErrors.email = 'Please enter a valid email address (e.g. contact@hospital.com).';
-    }
-
-    // Phone format validation
-    const cleanPhone = formData.phone.replace(/\D/g, '');
+    const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
     if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required.';
+      newErrors.phone = 'Emergency phone number is required.';
     } else if (cleanPhone.length !== 10) {
-      newErrors.phone = 'Please enter a valid 10-digit mobile/phone number.';
+      newErrors.phone = 'Please enter a valid 10-digit phone number.';
     }
 
-    // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required.';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters long.';
     }
 
-    // Confirm password validation
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password.';
     } else if (formData.password !== formData.confirmPassword) {
@@ -224,19 +228,24 @@ const HospitalRegister = () => {
     setErrors({});
     setSuccess('');
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsLoading(true);
-
     try {
       const additionalData = {
         name: formData.name.trim(),
         phone: formData.phone.trim(),
         hospitalName: formData.hospitalName.trim(),
         address: formData.address,
-        location: formData.location
+        location: formData.location,
+        traumaLevel: formData.traumaLevel,
+        beds: {
+          emergency: parseInt(formData.emergencyBeds, 10) || 14,
+          icu: parseInt(formData.icuBeds, 10) || 6,
+          total: (parseInt(formData.emergencyBeds, 10) || 14) + (parseInt(formData.icuBeds, 10) || 6) + 40
+        },
+        doctorsOnDuty: parseInt(formData.doctorsOnDuty, 10) || 8,
+        specialties: formData.specialties.split(',').map(s => s.trim()).filter(Boolean)
       };
 
       const registered = await register(
@@ -248,7 +257,6 @@ const HospitalRegister = () => {
 
       if (registered) {
         setSuccess(`Hospital "${formData.hospitalName}" registered successfully!`);
-        setRegistrationComplete(true);
         setTimeout(() => {
           navigate('/hospital/dashboard');
         }, 1200);
@@ -267,15 +275,18 @@ const HospitalRegister = () => {
   const currentLng = formData.location.coordinates[0];
 
   return (
-    <div className="register-page" style={{ padding: '40px 0' }}>
+    <div className="register-page" style={{ padding: '40px 0', background: '#f8fafc', minHeight: '100vh' }}>
       <Container>
-        <div className="register-container" style={{ maxWidth: '880px', margin: '0 auto', background: '#fff', borderRadius: '16px', padding: '36px', boxShadow: '0 8px 30px rgba(0,0,0,0.08)' }}>
-          <div className="register-header text-center mb-4">
-            <div style={{ width: '60px', height: '60px', background: '#eef4ff', color: '#1359bd', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <FaHospital size={30} />
+        <div className="register-container" style={{ maxWidth: '920px', margin: '0 auto', background: '#fff', borderRadius: '16px', padding: '36px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #e2e8f0' }}>
+          
+          <div className="text-center mb-4">
+            <div style={{ width: '56px', height: '56px', background: '#eef4ff', color: '#1359bd', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+              <FaHospital size={28} />
             </div>
-            <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#10233c' }}>Hospital Registration</h1>
-            <p style={{ color: '#607087' }}>Register your hospital and pin your location on the map so ambulances can find and route to you.</p>
+            <h1 style={{ fontSize: '1.9rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>Hospital Registration</h1>
+            <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
+              Register your hospital facility and coordinate bed availability with the 108 emergency network.
+            </p>
           </div>
 
           {errors.general && (
@@ -292,14 +303,15 @@ const HospitalRegister = () => {
           )}
 
           <Form onSubmit={handleSubmit} noValidate>
+            
             {/* Step 1: Hospital Name & Map Search */}
-            <Card className="mb-4 border-0" style={{ background: '#f8fafc', borderRadius: '12px', padding: '20px' }}>
-              <h5 style={{ fontWeight: 700, color: '#10233c', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FaMapMarkerAlt style={{ color: '#dc2626' }} /> Step 1: Search & Pin Hospital on Map
+            <Card className="mb-4 border-0" style={{ background: '#f8fafc', borderRadius: '12px', padding: '22px', border: '1px solid #e2e8f0' }}>
+              <h5 style={{ fontWeight: 700, color: '#0f172a', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FaMapMarkerAlt style={{ color: '#1359bd' }} /> Step 1: Hospital Name & Map Coordinates
               </h5>
               
               <Form.Group className="mb-3 position-relative">
-                <Form.Label style={{ fontWeight: 600 }}>Type Hospital Name (Auto-locates on Map)</Form.Label>
+                <Form.Label style={{ fontWeight: 600, color: '#334155' }}>Hospital Name (Type to Auto-Locate on Map)</Form.Label>
                 <div style={{ position: 'relative' }}>
                   <Form.Control
                     type="text"
@@ -307,7 +319,7 @@ const HospitalRegister = () => {
                     value={searchQuery}
                     onChange={handleSearchChange}
                     isInvalid={!!errors.hospitalName}
-                    style={{ paddingRight: '40px', fontSize: '1.05rem', height: '48px' }}
+                    style={{ paddingRight: '40px', fontSize: '1rem', height: '46px', borderRadius: '8px' }}
                     required
                   />
                   <div style={{ position: 'absolute', right: '14px', top: '14px', color: '#94a3b8' }}>
@@ -320,7 +332,7 @@ const HospitalRegister = () => {
                   </div>
                 )}
 
-                {/* Autocomplete Suggestions Dropdown */}
+                {/* Autocomplete Suggestions */}
                 {searchResults.length > 0 && (
                   <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 1050, background: '#fff', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.15)', border: '1px solid #e2e8f0', marginTop: '4px', overflow: 'hidden' }}>
                     {searchResults.map((place, idx) => (
@@ -331,7 +343,7 @@ const HospitalRegister = () => {
                         onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
                         onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
                       >
-                        <span style={{ fontSize: '18px' }}>🏥</span>
+                        <span style={{ fontWeight: 700, color: '#1359bd' }}>H</span>
                         <div style={{ overflow: 'hidden' }}>
                           <strong style={{ display: 'block', color: '#0f172a', fontSize: '0.95rem' }}>
                             {place.name || place.display_name.split(',')[0]}
@@ -355,8 +367,8 @@ const HospitalRegister = () => {
                   scrollWheelZoom={false}
                 >
                   <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution="&copy; TomTom"
+                    url={`https://api.tomtom.com/map/1/tile/basic/main/{z}/{x}/{y}.png?key=${process.env.REACT_APP_TOMTOM_API_KEY || 'YiM8ZHJlnpK4TezEC0VhMMKhd7FqnJ42'}`}
                   />
                   <Marker position={[currentLat, currentLng]} icon={hospitalPinIcon}>
                     <Popup>
@@ -369,21 +381,107 @@ const HospitalRegister = () => {
                   <MapClickHandler onLocationSelect={handleMapPinClick} />
                 </MapContainer>
                 <div style={{ position: 'absolute', bottom: '10px', left: '10px', background: 'rgba(15,23,42,0.85)', color: '#fff', padding: '5px 12px', borderRadius: '20px', fontSize: '0.78rem', zIndex: 1000, pointerEvents: 'none' }}>
-                  📍 Click anywhere on map to reposition hospital pin ({currentLat.toFixed(4)}, {currentLng.toFixed(4)})
+                  Click map to reposition pin &mdash; ({currentLat.toFixed(4)}, {currentLng.toFixed(4)})
                 </div>
               </div>
             </Card>
 
-            {/* Step 2: Account & Contact Details */}
-            <Card className="mb-4 border-0" style={{ background: '#f8fafc', borderRadius: '12px', padding: '20px' }}>
-              <h5 style={{ fontWeight: 700, color: '#10233c', marginBottom: '14px' }}>
-                Step 2: Account & Contact Details
+            {/* Step 2: Bed Capacity & Medical Capabilities */}
+            <Card className="mb-4 border-0" style={{ background: '#f8fafc', borderRadius: '12px', padding: '22px', border: '1px solid #e2e8f0' }}>
+              <h5 style={{ fontWeight: 700, color: '#0f172a', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FaBed style={{ color: '#1359bd' }} /> Step 2: Bed Capacity & Medical Capabilities
               </h5>
 
-              <Row>
-                <Col md={6} className="mb-3">
+              <Row className="g-3">
+                <Col md={4}>
                   <Form.Group>
-                    <Form.Label style={{ fontWeight: 600 }}>Contact Person Name</Form.Label>
+                    <Form.Label style={{ fontWeight: 600, color: '#334155' }}>Emergency Beds Available</Form.Label>
+                    <Form.Control
+                      type="number"
+                      name="emergencyBeds"
+                      value={formData.emergencyBeds}
+                      onChange={handleChange}
+                      style={{ height: '44px', borderRadius: '8px' }}
+                      min="0"
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label style={{ fontWeight: 600, color: '#334155' }}>ICU Beds Available</Form.Label>
+                    <Form.Control
+                      type="number"
+                      name="icuBeds"
+                      value={formData.icuBeds}
+                      onChange={handleChange}
+                      style={{ height: '44px', borderRadius: '8px' }}
+                      min="0"
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label style={{ fontWeight: 600, color: '#334155' }}>On-Duty Doctors</Form.Label>
+                    <Form.Control
+                      type="number"
+                      name="doctorsOnDuty"
+                      value={formData.doctorsOnDuty}
+                      onChange={handleChange}
+                      style={{ height: '44px', borderRadius: '8px' }}
+                      min="1"
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label style={{ fontWeight: 600, color: '#334155' }}>Trauma Care Level</Form.Label>
+                    <Form.Select
+                      name="traumaLevel"
+                      value={formData.traumaLevel}
+                      onChange={handleChange}
+                      style={{ height: '44px', borderRadius: '8px' }}
+                    >
+                      <option>Level 1 Major Trauma</option>
+                      <option>Level 1 Multi-Specialty</option>
+                      <option>Level 1 Cardiac Emergency</option>
+                      <option>Level 1 Neuro Trauma</option>
+                      <option>Level 2 Emergency Care</option>
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label style={{ fontWeight: 600, color: '#334155' }}>Active Specialties (Comma separated)</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="specialties"
+                      placeholder="Cardiology, Trauma Care, ICU Care"
+                      value={formData.specialties}
+                      onChange={handleChange}
+                      style={{ height: '44px', borderRadius: '8px' }}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+            </Card>
+
+            {/* Step 3: Account & Authentication */}
+            <Card className="mb-4 border-0" style={{ background: '#f8fafc', borderRadius: '12px', padding: '22px', border: '1px solid #e2e8f0' }}>
+              <h5 style={{ fontWeight: 700, color: '#0f172a', marginBottom: '14px' }}>
+                Step 3: Account & Login Credentials
+              </h5>
+
+              <Row className="g-3">
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label style={{ fontWeight: 600, color: '#334155' }}>Contact Administrator Name</Form.Label>
                     <div className="input-group">
                       <span className="input-group-text bg-white"><FaUser /></span>
                       <Form.Control
@@ -393,6 +491,7 @@ const HospitalRegister = () => {
                         value={formData.name}
                         onChange={handleChange}
                         isInvalid={!!errors.name}
+                        style={{ height: '44px' }}
                         required
                       />
                     </div>
@@ -400,9 +499,9 @@ const HospitalRegister = () => {
                   </Form.Group>
                 </Col>
 
-                <Col md={6} className="mb-3">
+                <Col md={6}>
                   <Form.Group>
-                    <Form.Label style={{ fontWeight: 600 }}>Emergency Contact Phone (10 digits)</Form.Label>
+                    <Form.Label style={{ fontWeight: 600, color: '#334155' }}>Emergency Desk Phone (10 Digits)</Form.Label>
                     <div className="input-group">
                       <span className="input-group-text bg-white"><FaPhone /></span>
                       <Form.Control
@@ -412,6 +511,7 @@ const HospitalRegister = () => {
                         value={formData.phone}
                         onChange={handleChange}
                         isInvalid={!!errors.phone}
+                        style={{ height: '44px' }}
                         required
                       />
                     </div>
@@ -419,18 +519,19 @@ const HospitalRegister = () => {
                   </Form.Group>
                 </Col>
 
-                <Col md={12} className="mb-3">
+                <Col md={12}>
                   <Form.Group>
-                    <Form.Label style={{ fontWeight: 600 }}>Hospital Email Address (for Login)</Form.Label>
+                    <Form.Label style={{ fontWeight: 600, color: '#334155' }}>Hospital Portal Login Email</Form.Label>
                     <div className="input-group">
                       <span className="input-group-text bg-white"><FaEnvelope /></span>
                       <Form.Control
                         type="email"
                         name="email"
-                        placeholder="e.g. admin@cityhospital.com"
+                        placeholder="e.g. emergency@hospital.com"
                         value={formData.email}
                         onChange={handleChange}
                         isInvalid={!!errors.email}
+                        style={{ height: '44px' }}
                         required
                       />
                     </div>
@@ -438,9 +539,9 @@ const HospitalRegister = () => {
                   </Form.Group>
                 </Col>
 
-                <Col md={6} className="mb-3">
+                <Col md={6}>
                   <Form.Group>
-                    <Form.Label style={{ fontWeight: 600 }}>Password (min 6 characters)</Form.Label>
+                    <Form.Label style={{ fontWeight: 600, color: '#334155' }}>Password</Form.Label>
                     <div className="input-group">
                       <span className="input-group-text bg-white"><FaLock /></span>
                       <Form.Control
@@ -450,6 +551,7 @@ const HospitalRegister = () => {
                         value={formData.password}
                         onChange={handleChange}
                         isInvalid={!!errors.password}
+                        style={{ height: '44px' }}
                         required
                       />
                     </div>
@@ -457,18 +559,19 @@ const HospitalRegister = () => {
                   </Form.Group>
                 </Col>
 
-                <Col md={6} className="mb-3">
+                <Col md={6}>
                   <Form.Group>
-                    <Form.Label style={{ fontWeight: 600 }}>Confirm Password</Form.Label>
+                    <Form.Label style={{ fontWeight: 600, color: '#334155' }}>Confirm Password</Form.Label>
                     <div className="input-group">
                       <span className="input-group-text bg-white"><FaLock /></span>
                       <Form.Control
                         type="password"
                         name="confirmPassword"
-                        placeholder="Confirm password"
+                        placeholder="Re-enter password"
                         value={formData.confirmPassword}
                         onChange={handleChange}
                         isInvalid={!!errors.confirmPassword}
+                        style={{ height: '44px' }}
                         required
                       />
                     </div>
@@ -479,28 +582,28 @@ const HospitalRegister = () => {
             </Card>
 
             <Button
+              variant="primary"
               type="submit"
+              size="lg"
               className="w-100 py-3"
-              disabled={isLoading || registrationComplete}
-              style={{ background: '#1359bd', border: 'none', borderRadius: '10px', fontSize: '1.1rem', fontWeight: 700 }}
+              disabled={isLoading}
+              style={{ fontWeight: 700, borderRadius: '10px', fontSize: '1.05rem', background: '#1359bd', border: 'none' }}
             >
               {isLoading ? (
                 <>
-                  <Loader small /> <span className="ms-2">Registering Hospital…</span>
-                </>
-              ) : registrationComplete ? (
-                <>
-                  <FaCheckCircle className="me-2" /> Hospital Registered!
+                  <Spinner animation="border" size="sm" className="me-2" />
+                  Registering Facility & Syncing Network...
                 </>
               ) : (
-                'Register Hospital & Open Dashboard'
+                'Register Hospital & Connect to 108 Network'
               )}
             </Button>
 
-            <div className="text-center mt-3" style={{ color: '#607087' }}>
-              Already registered? <Link to="/hospital/login" style={{ color: '#1359bd', fontWeight: 600 }}>Login to your hospital account</Link>
+            <div className="text-center mt-3 text-muted small">
+              Already have an account? <Link to="/hospital/login" style={{ color: '#1359bd', fontWeight: 600 }}>Sign in to Hospital Portal</Link>
             </div>
           </Form>
+
         </div>
       </Container>
     </div>

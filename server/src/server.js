@@ -64,13 +64,20 @@ function generateSimulatedRoutes(origin, destination) {
   });
 }
 
+const routeCache = new Map();
+
 const routesFromTomTom = async (origin, destination) => {
+  const cacheKey = `${origin.lat.toFixed(4)},${origin.lng.toFixed(4)}:${destination.lat.toFixed(4)},${destination.lng.toFixed(4)}`;
+  if (routeCache.has(cacheKey)) {
+    return routeCache.get(cacheKey);
+  }
+
   const apiKey = process.env.TOMTOM_API_KEY;
   if (apiKey) {
     try {
       const coords = `${origin.lat},${origin.lng}:${destination.lat},${destination.lng}`;
       const url = `https://api.tomtom.com/routing/1/calculateRoute/${coords}/json?key=${encodeURIComponent(apiKey)}&maxAlternatives=2&traffic=true&routeRepresentation=polyline&travelMode=car`;
-      const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      const response = await fetch(url, { signal: AbortSignal.timeout(2500) });
       if (response.ok) {
         const data = await response.json();
         if (data.routes && data.routes.length > 0) {
@@ -81,21 +88,25 @@ const routesFromTomTom = async (origin, destination) => {
             geometry: route.legs.flatMap((leg) => leg.points.map((point) => ({ lat: point.latitude, lng: point.longitude })))
           }));
 
-          // If TomTom only returned 1 or 2 routes, complement to 3
           if (parsed.length < 3) {
             const fallback = generateSimulatedRoutes(origin, destination);
             while (parsed.length < 3) {
               parsed.push(fallback[parsed.length]);
             }
           }
+          routeCache.set(cacheKey, parsed);
+          // Auto-expire cache after 10 minutes
+          setTimeout(() => routeCache.delete(cacheKey), 600000);
           return parsed;
         }
       }
     } catch (err) {
-      console.warn('TomTom API request failed, falling back to simulated routes:', err.message);
+      console.warn('TomTom routing notice (using fast fallback):', err.message);
     }
   }
-  return generateSimulatedRoutes(origin, destination);
+  const simulated = generateSimulatedRoutes(origin, destination);
+  routeCache.set(cacheKey, simulated);
+  return simulated;
 };
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
@@ -172,8 +183,51 @@ app.patch('/api/hospitals/:id', async (req, res, next) => {
     res.json(hospital);
   } catch (error) { next(error); }
 });
+
+app.patch('/api/hospitals/by-name/:name', async (req, res, next) => {
+  try {
+    const queryName = decodeURIComponent(req.params.name).trim();
+    let hospital = await Hospital.findOne({ name: new RegExp('^' + queryName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') });
+    if (!hospital) {
+      const { lat, lng, phone, traumaLevel, specialties, beds, doctorsOnDuty, accepting } = req.body;
+      hospital = await Hospital.create({
+        name: queryName,
+        lat: lat || 12.9716,
+        lng: lng || 77.5946,
+        phone: phone || '',
+        accepting: typeof accepting === 'boolean' ? accepting : true,
+        traumaLevel: traumaLevel || 'Level 1 Trauma',
+        specialties: Array.isArray(specialties) ? specialties : ['Trauma & Emergency', 'General Surgery', 'ICU Care'],
+        beds: beds || { emergency: 12, icu: 6, total: 50 },
+        doctorsOnDuty: doctorsOnDuty || 8,
+        doctorsAvailable: doctorsOnDuty || 8,
+        bedsAvailable: (beds?.emergency || 12) + (beds?.icu || 6)
+      });
+      io.emit('hospital:added', hospital);
+      return res.json(hospital);
+    }
+    const { accepting, beds, doctorsOnDuty, specialties, traumaLevel } = req.body;
+    if (typeof accepting === 'boolean') hospital.accepting = accepting;
+    if (beds) {
+      hospital.beds = { ...hospital.beds.toObject(), ...beds };
+      hospital.bedsAvailable = (hospital.beds.emergency || 0) + (hospital.beds.icu || 0);
+    }
+    if (typeof doctorsOnDuty === 'number') {
+      hospital.doctorsOnDuty = doctorsOnDuty;
+      hospital.doctorsAvailable = doctorsOnDuty;
+    }
+    if (Array.isArray(specialties)) hospital.specialties = specialties;
+    if (traumaLevel) hospital.traumaLevel = traumaLevel;
+    await hospital.save();
+    io.emit('hospital:updated', hospital);
+    res.json(hospital);
+  } catch (error) { next(error); }
+});
+
 app.get('/api/ambulances', async (_req, res, next) => { try { res.json((await Ambulance.find().sort({ name: 1 })).map(publicAmbulance)); } catch (error) { next(error); } });
+app.get('/api/ambulances/:id', async (req, res, next) => { try { const amb = await Ambulance.findById(req.params.id); if (!amb) return res.status(404).json({ message: 'Ambulance not found.' }); res.json(publicAmbulance(amb)); } catch (error) { next(error); } });
 app.get('/api/stats', async (_req, res, next) => { try { res.json(await getStats()); } catch (error) { next(error); } });
+
 app.post('/api/ambulances', async (req, res, next) => {
   try {
     const { name, type, driverName, vehicleNumber, lat, lng } = req.body;
@@ -203,7 +257,7 @@ app.post('/api/call', async (req, res, next) => {
     const ambulance = await Ambulance.findByIdAndUpdate(nearest.ambulance._id, { status: 'dispatched', activeCall }, { new: true });
     const result = { available: true, accident, ambulance: publicAmbulance(ambulance), tripId: trip._id, distanceKm: activeCall.distanceKm, etaMinutes };
     io.emit('dispatch:created', result);
-    io.to(`ambulance:${ambulance._id}`).emit('driver:incoming-call', result);
+    io.emit('driver:incoming-call', result);
     io.emit('stats:updated', await getStats());
     res.json(result);
   } catch (error) { next(error); }
@@ -232,10 +286,62 @@ app.patch('/api/trips/:id', async (req, res, next) => {
   try {
     const updates = {}; const { status, leg, route, hospital } = req.body;
     if (status) updates.status = status;
-    if (route && (leg === 1 || leg === 2)) { updates[`leg${leg}Route`] = route; updates.status = leg === 1 ? 'en_route_to_accident' : 'en_route_to_hospital'; }
-    if (hospital) { updates.hospital = hospital; updates.status = 'hospital_selected'; }
-    const trip = await Trip.findById(req.params.id); if (!trip) return res.status(404).json({ message: 'Trip not found.' });
-    Object.assign(trip, updates); await trip.save(); io.emit('trip:updated', trip); res.json(trip);
+    if (route && (leg === 1 || leg === 2)) {
+      updates[`leg${leg}Route`] = route;
+      updates.status = leg === 1 ? 'en_route_to_accident' : 'en_route_to_hospital';
+    }
+    if (hospital) {
+      updates.hospital = hospital;
+      updates.status = 'hospital_selected';
+    }
+    const trip = await Trip.findById(req.params.id);
+    if (!trip) return res.status(404).json({ message: 'Trip not found.' });
+    Object.assign(trip, updates);
+    await trip.save();
+    
+    io.emit('trip:updated', trip);
+
+    // If hospital chosen or en route to hospital, broadcast live incoming patient notification
+    if (updates.hospital || (leg === 2 && trip.hospital)) {
+      const amb = await Ambulance.findById(trip.ambulance);
+      const incomingData = {
+        tripId: trip._id,
+        hospital: trip.hospital,
+        ambulanceName: amb?.name || '108 Ambulance',
+        driverName: amb?.driverName || 'On-duty Driver',
+        driverPhone: '080-108-0000',
+        accident: trip.accident,
+        status: trip.status,
+        etaMinutes: trip.leg2Route ? Math.ceil(trip.leg2Route.durationSeconds / 60) : 5,
+        distanceKm: trip.leg2Route ? (trip.leg2Route.distanceMeters / 1000).toFixed(1) : '2.5',
+        timestamp: new Date()
+      };
+      io.emit('hospital:incoming-patient', incomingData);
+      io.emit('emergency:incoming', incomingData);
+
+      // Forward to Port 5001 (System 2 hospital dashboards) via HTTP bridge
+      fetch('http://localhost:5001/api/bridge/incoming-patient', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(incomingData)
+      }).catch((err) => console.warn('[Bridge] Could not forward to Port 5001:', err.message));
+    }
+
+    res.json(trip);
+
+    // When a trip completes, free the ambulance back to available
+    if (updates.status === 'completed') {
+      const freedAmbulance = await Ambulance.findByIdAndUpdate(
+        trip.ambulance,
+        { status: 'available', $unset: { activeCall: 1 } },
+        { new: true }
+      );
+      if (freedAmbulance) {
+        io.emit('ambulance:updated', publicAmbulance(freedAmbulance));
+        io.emit('dispatch:reset');
+        io.emit('stats:updated', await getStats());
+      }
+    }
   } catch (error) { next(error); }
 });
 

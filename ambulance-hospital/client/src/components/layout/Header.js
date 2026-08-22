@@ -142,24 +142,8 @@ const Header = () => {
               <span>Hospital</span>
             </Nav.Link>
             
-            <Nav.Link 
-              as="a" 
-              href="/ambulance/login" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="d-flex align-items-center"
-            >
-              <div className="designlab-feature-icon me-2" style={{ 
-                width: '28px', 
-                height: '28px', 
-                marginBottom: 0, 
-                background: 'rgba(255, 255, 255, 0.05)' 
-              }}>
-                <FaAmbulance size={14} />
-              </div>
-              <span>Ambulance</span>
-            </Nav.Link>
-            
+
+
             {isAuthenticated && !loading && (
               <>
                 <Nav.Link as={Link} to={`/${user?.role}/dashboard`} className="d-flex align-items-center">

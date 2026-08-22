@@ -10,34 +10,24 @@ import Footer from './components/layout/Footer';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import Loader from './components/common/Loader';
 
-// Pages
+// Pages — Hospital Only
 import Home from './pages/Home';
 import Login from './pages/Login';
-import RegisterSelection from './pages/RegisterSelection';
 import HospitalDashboard from './pages/hospital/Dashboard';
 import HospitalProfile from './pages/hospital/Profile';
 import HospitalRegister from './pages/hospital/Register';
 import HospitalLogin from './pages/hospital/Login';
 import DoctorManagement from './pages/hospital/DoctorManagement';
 import EmergencyRequests from './pages/hospital/EmergencyRequests';
-import AmbulanceDashboard from './pages/ambulance/Dashboard';
-import AmbulanceProfile from './pages/ambulance/Profile';
-import AmbulanceLogin from './pages/ambulance/Login';
-import HospitalSearch from './pages/ambulance/HospitalSearch';
-import EmergencyDetails from './pages/ambulance/EmergencyDetails';
-import AmbulanceNotifications from './pages/ambulance/Notifications';
-import DispatchDriver from './pages/ambulance/DispatchDriver';
-import DispatchRegister from './pages/ambulance/DispatchRegister';
 import NotFound from './pages/NotFound';
 
-import './styles/designlab-framer.css'; // Import DesignLab Framer style
-import './styles/improved-visibility.css'; // Import improved text visibility styles
-import './styles/dashboard-enhancements.css'; // Import dashboard-specific enhancements
-import './styles/emergency-text-visibility.css'; // Import emergency text visibility enhancements
-import './styles/ambulance-text-visibility.css'; // Import ambulance text visibility enhancements
-import './styles/toast-styles.css'; // Import custom toast styles
-import './styles/emergency-alert-modal.css'; // Import emergency alert modal styles
-import './styles/hospital-selection.css'; // Import hospital selection styles
+import './styles/designlab-framer.css';
+import './styles/improved-visibility.css';
+import './styles/dashboard-enhancements.css';
+import './styles/emergency-text-visibility.css';
+import './styles/toast-styles.css';
+import './styles/emergency-alert-modal.css';
+import './styles/hospital-selection.css';
 
 function App() {
   const { user, loading } = useContext(AuthContext);
@@ -49,161 +39,83 @@ function App() {
   return (
     <>
       <SocketProvider>
-        {/* Only show header when user is not authenticated */}
         {!user && <Header />}
         <main className="main-content">
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
-            <Route 
-              path="/login" 
-              element={user ? (
-                user.role === 'hospital' ? (
-                  <Navigate to="/hospital/dashboard" />
-                ) : (
-                  <Navigate to="/ambulance/dashboard" />
-                )
-              ) : (
-                <Login />
-              )} 
+
+            {/* Login — redirect to dashboard if already authenticated */}
+            <Route
+              path="/login"
+              element={user ? <Navigate to="/hospital/dashboard" /> : <Login />}
             />
-            <Route 
-              path="/hospital/login" 
-              element={user ? (
-                <Navigate to="/hospital/dashboard" />
-              ) : (
-                <HospitalLogin />
-              )} 
-            />
-            <Route 
-              path="/ambulance/login" 
-              element={user ? (
-                <Navigate to="/ambulance/dashboard" />
-              ) : (
-                <AmbulanceLogin />
-              )} 
-            />
-            <Route path="/ambulance/dispatch" element={<DispatchDriver />} />
-            <Route 
-              path="/register" 
-              element={user ? (
-                user.role === 'hospital' ? (
-                  <Navigate to="/hospital/dashboard" />
-                ) : (
-                  <Navigate to="/ambulance/dashboard" />
-                )
-              ) : (
-                <RegisterSelection />
-              )} 
-            />
-            <Route 
-              path="/hospital/register" 
-              element={user ? (
-                <Navigate to="/hospital/dashboard" />
-              ) : (
-                <HospitalRegister />
-              )} 
-            />
-            <Route 
-              path="/ambulance/register" 
-              element={user ? (
-                <Navigate to="/ambulance/dashboard" />
-              ) : (
-                <DispatchRegister />
-              )} 
+            <Route
+              path="/hospital/login"
+              element={user ? <Navigate to="/hospital/dashboard" /> : <HospitalLogin />}
             />
 
-            {/* Hospital Routes */}
-            <Route 
-              path="/hospital/dashboard" 
+            {/* Registration — hospital only. Any other register path redirects here */}
+            <Route
+              path="/register"
+              element={user ? <Navigate to="/hospital/dashboard" /> : <Navigate to="/hospital/register" />}
+            />
+            <Route
+              path="/hospital/register"
+              element={user ? <Navigate to="/hospital/dashboard" /> : <HospitalRegister />}
+            />
+
+            {/* Hospital Protected Routes */}
+            <Route
+              path="/hospital/dashboard"
               element={
                 <ProtectedRoute role="hospital">
                   <HospitalDashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/hospital/profile" 
+            <Route
+              path="/hospital/profile"
               element={
                 <ProtectedRoute role="hospital">
                   <HospitalProfile />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/hospital/doctor-management" 
+            <Route
+              path="/hospital/doctor-management"
               element={
                 <ProtectedRoute role="hospital">
                   <DoctorManagement />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/hospital/emergency-requests" 
+            <Route
+              path="/hospital/emergency-requests"
               element={
                 <ProtectedRoute role="hospital">
                   <EmergencyRequests />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/hospital/emergency-requests/:id" 
+            <Route
+              path="/hospital/emergency-requests/:id"
               element={
                 <ProtectedRoute role="hospital">
                   <EmergencyRequests />
                 </ProtectedRoute>
-              } 
-            />
-            {/* Hospital notifications route removed */}
-
-            {/* Ambulance Routes */}
-            <Route 
-              path="/ambulance/dashboard" 
-              element={
-                <ProtectedRoute role="ambulance">
-                  <AmbulanceDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/ambulance/profile" 
-              element={
-                <ProtectedRoute role="ambulance">
-                  <AmbulanceProfile />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/ambulance/hospitals" 
-              element={
-                <ProtectedRoute role="ambulance">
-                  <HospitalSearch />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/ambulance/emergency/:id" 
-              element={
-                <ProtectedRoute role="ambulance">
-                  <EmergencyDetails />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/ambulance/notifications" 
-              element={
-                <ProtectedRoute role="ambulance">
-                  <AmbulanceNotifications />
-                </ProtectedRoute>
-              } 
+              }
             />
 
-            {/* 404 Route */}
+            {/* Redirect old ambulance routes to home */}
+            <Route path="/ambulance/*" element={<Navigate to="/" />} />
+
+            {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
         <Footer />
-        <ToastContainer 
+        <ToastContainer
           position="bottom-right"
           autoClose={1500}
           hideProgressBar={true}

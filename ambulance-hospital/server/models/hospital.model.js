@@ -13,6 +13,23 @@ const hospitalSchema = new mongoose.Schema({
     trim: true,
     default: ''
   },
+  traumaLevel: {
+    type: String,
+    default: 'Level 1 Trauma'
+  },
+  specialties: {
+    type: [String],
+    default: ['Trauma & Emergency', 'Cardiology', 'ICU Care']
+  },
+  beds: {
+    emergency: { type: Number, default: 12 },
+    icu: { type: Number, default: 6 },
+    total: { type: Number, default: 60 }
+  },
+  accepting: {
+    type: Boolean,
+    default: true
+  },
   address: {
     street: { type: String, trim: true, default: '' },
     city:   { type: String, trim: true, default: '' },

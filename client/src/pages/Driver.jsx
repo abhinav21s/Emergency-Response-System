@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { CircleMarker, MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
@@ -10,48 +10,100 @@ import ArrivalCountdown from '../components/ArrivalCountdown';
 const tomTomKey = import.meta.env.VITE_TOMTOM_API_KEY || 'YiM8ZHJlnpK4TezEC0VhMMKhd7FqnJ42';
 
 // ─── Global Incoming Dispatch Banner ──────────────────────────────────────────
-// Renders outside of any conditional — always mounted so it always receives events
+// Always mounted — checks active calls on mount AND listens to socket broadcasts
 function GlobalDispatchBanner({ onClaimAndAccept, currentAmbulanceId }) {
   const [activeCalls, setActiveCalls] = useState([]);
 
+  const syncActiveCallsFromFleet = useCallback(async () => {
+    try {
+      const fleet = await api('/ambulances');
+      if (Array.isArray(fleet)) {
+        const dispatched = fleet
+          .filter((a) => a.status === 'dispatched' && a.activeCall && !a.activeCall.accepted)
+          .map((a) => ({
+            tripId: a.activeCall.tripId,
+            accident: a.activeCall.accident,
+            distanceKm: a.activeCall.distanceKm,
+            etaMinutes: a.activeCall.etaMinutes,
+            ambulance: a,
+            ambulanceId: a._id,
+            ambulanceName: a.name,
+          }));
+        setActiveCalls(dispatched);
+      }
+    } catch (_) {}
+  }, []);
+
   useEffect(() => {
+    // Initial fetch of any currently active dispatches
+    syncActiveCallsFromFleet();
+
     const onCall = (dispatch) => {
       if (!dispatch) return;
       setActiveCalls((prev) => {
         const id = dispatch.ambulance?._id || dispatch.ambulanceId || dispatch.tripId;
-        // Deduplicate by ambulance id
         const filtered = prev.filter((c) => (c.ambulance?._id || c.ambulanceId || c.tripId) !== id);
         return [dispatch, ...filtered];
       });
-      // Auto-clear after 3 min
-      setTimeout(() => {
-        setActiveCalls((prev) => prev.filter((c) => (c.ambulance?._id || c.ambulanceId || c.tripId) !== (dispatch.ambulance?._id || dispatch.ambulanceId || dispatch.tripId)));
-      }, 180000);
+    };
+
+    const onAmbulanceUpdated = (amb) => {
+      if (amb.status === 'available' || !amb.activeCall) {
+        setActiveCalls((prev) => prev.filter((c) => (c.ambulance?._id || c.ambulanceId) !== amb._id));
+      } else if (amb.status === 'dispatched' && amb.activeCall && !amb.activeCall.accepted) {
+        onCall({
+          tripId: amb.activeCall.tripId,
+          accident: amb.activeCall.accident,
+          distanceKm: amb.activeCall.distanceKm,
+          etaMinutes: amb.activeCall.etaMinutes,
+          ambulance: amb,
+          ambulanceId: amb._id,
+          ambulanceName: amb.name,
+        });
+      }
+    };
+
+    const onTripUpdated = (trip) => {
+      if (trip.status === 'completed' || trip.status === 'accepted') {
+        setActiveCalls((prev) =>
+          prev.filter(
+            (c) =>
+              c.tripId !== trip._id &&
+              (c.ambulance?._id || c.ambulanceId) !== (trip.ambulance?._id || trip.ambulance)
+          )
+        );
+      }
     };
 
     const onReset = () => setActiveCalls([]);
 
     socket.on('driver:incoming-call', onCall);
     socket.on('dispatch:created', onCall);
-    socket.on('dispatch:reset', onReset);
+    socket.on('ambulance:updated', onAmbulanceUpdated);
+    socket.on('trip:updated', onTripUpdated);
+    socket.on('demo:reset', onReset);
+    socket.on('ambulances:reset', onReset);
 
     return () => {
       socket.off('driver:incoming-call', onCall);
       socket.off('dispatch:created', onCall);
-      socket.off('dispatch:reset', onReset);
+      socket.off('ambulance:updated', onAmbulanceUpdated);
+      socket.off('trip:updated', onTripUpdated);
+      socket.off('demo:reset', onReset);
+      socket.off('ambulances:reset', onReset);
     };
-  }, []);
+  }, [syncActiveCallsFromFleet]);
 
   if (activeCalls.length === 0) return null;
 
   return (
     <div style={{ display: 'grid', gap: '10px', marginBottom: '20px' }}>
-      {activeCalls.map((call, idx) => {
-        const callAmbId = call.ambulance?._id || call.ambulanceId;
+      {activeCalls.map((callItem, idx) => {
+        const callAmbId = callItem.ambulance?._id || callItem.ambulanceId;
         const isCurrentUnit = currentAmbulanceId && callAmbId === currentAmbulanceId;
         return (
           <div
-            key={idx}
+            key={callItem.tripId || callAmbId || idx}
             style={{
               background: '#fff1f2',
               border: '2px solid #dc2626',
@@ -61,17 +113,16 @@ function GlobalDispatchBanner({ onClaimAndAccept, currentAmbulanceId }) {
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '16px',
-              animation: 'pulseRed 2s infinite',
               boxShadow: '0 4px 14px rgba(220,38,38,0.2)'
             }}
           >
             <div>
               <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#991b1b', letterSpacing: '0.04em' }}>
-                EMERGENCY DISPATCH &mdash; {call.ambulance?.name || call.ambulanceName || '108 Ambulance Unit'}
+                EMERGENCY DISPATCH &mdash; {callItem.ambulance?.name || callItem.ambulanceName || '108 Ambulance Unit'}
               </div>
               <div style={{ fontSize: '0.85rem', color: '#7f1d1d', marginTop: '2px' }}>
-                Accident: {call.accident?.lat?.toFixed(4)}, {call.accident?.lng?.toFixed(4)}
-                {call.distanceKm ? ` &bull; ${call.distanceKm} km (ETA ${call.etaMinutes} min)` : ''}
+                Accident: {callItem.accident?.lat?.toFixed(4)}, {callItem.accident?.lng?.toFixed(4)}
+                {callItem.distanceKm ? ` &bull; ${callItem.distanceKm} km (ETA ${callItem.etaMinutes} min)` : ''}
               </div>
             </div>
             <button
@@ -88,7 +139,7 @@ function GlobalDispatchBanner({ onClaimAndAccept, currentAmbulanceId }) {
                 cursor: 'pointer'
               }}
               onClick={() => {
-                onClaimAndAccept(call);
+                onClaimAndAccept(callItem);
                 setActiveCalls((prev) => prev.filter((_, i) => i !== idx));
               }}
             >
@@ -101,7 +152,7 @@ function GlobalDispatchBanner({ onClaimAndAccept, currentAmbulanceId }) {
   );
 }
 
-// ─── Header bar — shown on both selection screen and driver terminal ───────────
+// ─── Header bar ───────────────────────────────────────────────────────────────
 function DriverBar({ autoFollow, onToggleAutoFollow, ambulance, onChangeVehicle }) {
   return (
     <div style={{
@@ -188,7 +239,7 @@ function VehicleSelectScreen({ onSelect, ambulances, loading, error }) {
       <p className="eyebrow">AMBULANCE DRIVER TERMINAL</p>
       <h1>Select Your Vehicle</h1>
       <p style={{ color: '#64748b', marginBottom: '20px' }}>
-        Choose your assigned vehicle below. When Auto-Follow is <strong>ON</strong>, you do not need to select — the terminal will auto-switch to any dispatched unit.
+        Choose your assigned vehicle below. When Auto-Follow is <strong>ON</strong>, the terminal will auto-switch to any dispatched unit.
       </p>
 
       <div style={{ display: 'grid', gap: '8px', maxHeight: '400px', overflowY: 'auto', paddingRight: '4px' }}>
@@ -230,7 +281,9 @@ function VehicleSelectScreen({ onSelect, ambulances, loading, error }) {
               <strong style={{ display: 'block', fontSize: '0.95rem', color: '#0f172a' }}>{a.name}</strong>
               <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
                 {a.driverName || 'Unassigned'} &bull; {a.type?.toUpperCase()} &bull; {a.vehicleNumber || 'No plate'} &bull;{' '}
-                <span style={{ color: a.status === 'available' ? '#16a34a' : '#dc2626', fontWeight: 700 }}>{a.status}</span>
+                <span style={{ color: a.status === 'available' ? '#16a34a' : '#dc2626', fontWeight: 700 }}>
+                  {a.status}
+                </span>
               </span>
             </div>
             <span style={{ color: '#1359bd', fontWeight: 700, fontSize: '0.85rem', flexShrink: 0 }}>
@@ -259,7 +312,7 @@ function HospitalSelect({ trip, onChosen }) {
       .finally(() => setLoading(false));
 
     const onHospitalUpdated = (updated) => {
-      setHospitals((prev) => prev.map((h) => h._id === updated._id ? { ...h, ...updated } : h));
+      setHospitals((prev) => prev.map((h) => (h._id === updated._id ? { ...h, ...updated } : h)));
     };
     socket.on('hospital:updated', onHospitalUpdated);
     return () => socket.off('hospital:updated', onHospitalUpdated);
@@ -434,64 +487,82 @@ export default function Driver() {
   const [loadingAmbulances, setLoadingAmbulances] = useState(true);
   const [fleetError, setFleetError] = useState('');
   const [showVehicleSelect, setShowVehicleSelect] = useState(
-    // Show selection screen on first load if no vehicle is saved and autoFollow is off
     () => !localStorage.getItem('driverSession') && localStorage.getItem('driverAutoFollow') !== 'true'
   );
 
   const autoFollowRef = useRef(autoFollow);
   autoFollowRef.current = autoFollow;
 
-  // Load the fleet list
-  useEffect(() => {
-    api('/ambulances')
-      .then((data) => setAmbulances(data))
-      .catch((err) => setFleetError(err.message))
-      .finally(() => setLoadingAmbulances(false));
-  }, []);
-
-  // On mount: if a vehicle session is saved and it is already dispatched, restore its active trip
-  useEffect(() => {
-    const savedSession = JSON.parse(localStorage.getItem('driverSession') || 'null');
-    if (!savedSession?._id) return;
-    restoreAmbulanceState(savedSession);
-  }, []); // eslint-disable-line
-
-  // Fetches latest ambulance state from server and restores call/trip
-  const restoreAmbulanceState = async (amb) => {
+  // Restore or find latest active dispatch if in AutoFollow mode or for saved ambulance
+  const syncFleetAndActiveCalls = useCallback(async () => {
     try {
-      // Get fresh ambulance data from server
-      const fresh = await api(`/ambulances/${amb._id}`);
-      if (!fresh) return;
-      setAmbulance(fresh);
-      localStorage.setItem('driverSession', JSON.stringify(fresh));
+      const fleet = await api('/ambulances');
+      setAmbulances(fleet);
+      setLoadingAmbulances(false);
 
-      if (fresh.status === 'dispatched' && fresh.activeCall) {
-        const ac = fresh.activeCall;
-        // Reconstruct a call object matching the dispatch event shape
-        const restoredCall = {
-          tripId: ac.tripId,
-          accident: ac.accident,
-          distanceKm: ac.distanceKm,
-          etaMinutes: ac.etaMinutes,
-          ambulance: fresh,
-          ambulanceId: fresh._id,
-          ambulanceName: fresh.name
-        };
-        setCall(restoredCall);
-        setTrip(null);
-        setShowVehicleSelect(false);
-        // If already accepted (past dispatch), try to load the trip
-        if (ac.accepted && ac.tripId) {
-          try {
-            const tripData = await api(`/trips/${ac.tripId}`);
-            if (tripData) setTrip(tripData);
-          } catch (_) { /* trip may not exist */ }
+      if (autoFollowRef.current) {
+        // If in Auto-Follow mode: find ANY ambulance with an active dispatch
+        const activeDispatched = fleet.find((a) => a.status === 'dispatched' && a.activeCall);
+        if (activeDispatched) {
+          const ac = activeDispatched.activeCall;
+          setAmbulance(activeDispatched);
+          localStorage.setItem('driverSession', JSON.stringify(activeDispatched));
+          setCall({
+            tripId: ac.tripId,
+            accident: ac.accident,
+            distanceKm: ac.distanceKm,
+            etaMinutes: ac.etaMinutes,
+            ambulance: activeDispatched,
+            ambulanceId: activeDispatched._id,
+            ambulanceName: activeDispatched.name,
+          });
+          setShowVehicleSelect(false);
+          if (ac.accepted && ac.tripId) {
+            try {
+              const tripData = await api(`/trips/${ac.tripId}`);
+              if (tripData) setTrip(tripData);
+            } catch (_) {}
+          }
+        }
+      } else {
+        // Locked to vehicle mode: check saved ambulance
+        const savedSession = JSON.parse(localStorage.getItem('driverSession') || 'null');
+        if (savedSession?._id) {
+          const currentFresh = fleet.find((a) => a._id === savedSession._id);
+          if (currentFresh) {
+            setAmbulance(currentFresh);
+            localStorage.setItem('driverSession', JSON.stringify(currentFresh));
+            if (currentFresh.status === 'dispatched' && currentFresh.activeCall) {
+              const ac = currentFresh.activeCall;
+              setCall({
+                tripId: ac.tripId,
+                accident: ac.accident,
+                distanceKm: ac.distanceKm,
+                etaMinutes: ac.etaMinutes,
+                ambulance: currentFresh,
+                ambulanceId: currentFresh._id,
+                ambulanceName: currentFresh.name,
+              });
+              setShowVehicleSelect(false);
+              if (ac.accepted && ac.tripId) {
+                try {
+                  const tripData = await api(`/trips/${ac.tripId}`);
+                  if (tripData) setTrip(tripData);
+                } catch (_) {}
+              }
+            }
+          }
         }
       }
     } catch (err) {
-      console.warn('Could not restore ambulance state:', err.message);
+      setFleetError(err.message);
+      setLoadingAmbulances(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    syncFleetAndActiveCalls();
+  }, [syncFleetAndActiveCalls]);
 
   const toggleAutoFollow = () => {
     const next = !autoFollow;
@@ -503,49 +574,54 @@ export default function Driver() {
     }
     if (next) {
       setShowVehicleSelect(false);
+      // Immediately sync with any active dispatch
+      syncFleetAndActiveCalls();
     }
   };
 
-  // Select an ambulance — if already dispatched, restore its active call/trip
+  // Select an ambulance — fetch fresh status from server and load active trip if dispatched
   const selectAmbulance = async (amb, incomingCall = null) => {
-    localStorage.setItem('driverSession', JSON.stringify(amb));
-    setAmbulance(amb);
-    setShowVehicleSelect(false);
+    try {
+      const fresh = await api(`/ambulances/${amb._id}`).catch(() => amb);
+      const selected = fresh || amb;
+      localStorage.setItem('driverSession', JSON.stringify(selected));
+      setAmbulance(selected);
+      setShowVehicleSelect(false);
 
-    if (incomingCall) {
-      // Came from banner click — use the provided call directly
-      setCall(incomingCall);
-      setTrip(null);
-      return;
-    }
-
-    // Check if this ambulance is already mid-dispatch
-    if (amb.status === 'dispatched' && amb.activeCall) {
-      const ac = amb.activeCall;
-      const restoredCall = {
-        tripId: ac.tripId,
-        accident: ac.accident,
-        distanceKm: ac.distanceKm,
-        etaMinutes: ac.etaMinutes,
-        ambulance: amb,
-        ambulanceId: amb._id,
-        ambulanceName: amb.name
-      };
-      setCall(restoredCall);
-      setTrip(null);
-      // If already accepted, also load the trip
-      if (ac.accepted && ac.tripId) {
-        try {
-          const tripData = await api(`/trips/${ac.tripId}`);
-          if (tripData) setTrip(tripData);
-        } catch (_) { /* ignore */ }
+      if (incomingCall) {
+        setCall(incomingCall);
+        setTrip(null);
+        return;
       }
-      return;
-    }
 
-    // Ambulance is available — start fresh
-    setCall(null);
-    setTrip(null);
+      if (selected.status === 'dispatched' && selected.activeCall) {
+        const ac = selected.activeCall;
+        const restoredCall = {
+          tripId: ac.tripId,
+          accident: ac.accident,
+          distanceKm: ac.distanceKm,
+          etaMinutes: ac.etaMinutes,
+          ambulance: selected,
+          ambulanceId: selected._id,
+          ambulanceName: selected.name,
+        };
+        setCall(restoredCall);
+        setTrip(null);
+        if (ac.accepted && ac.tripId) {
+          try {
+            const tripData = await api(`/trips/${ac.tripId}`);
+            if (tripData) setTrip(tripData);
+          } catch (_) {}
+        }
+        return;
+      }
+
+      setCall(null);
+      setTrip(null);
+    } catch (_) {
+      setAmbulance(amb);
+      setShowVehicleSelect(false);
+    }
   };
 
   const changeVehicle = () => {
@@ -557,10 +633,7 @@ export default function Driver() {
     setAmbulance(null);
     setCall(null);
     setTrip(null);
-    // Refresh the fleet list so the freed ambulance shows as available
-    api('/ambulances')
-      .then((data) => setAmbulances(data))
-      .catch(() => {});
+    syncFleetAndActiveCalls();
     setShowVehicleSelect(true);
   };
 
@@ -597,24 +670,17 @@ export default function Driver() {
       }
     };
 
-    // ambulance:updated fires when an ambulance's status changes (e.g. freed after trip completes)
     const onAmbulanceUpdated = (updatedAmb) => {
-      // Refresh the fleet list so the vehicle shows as available again
-      setAmbulances((prev) =>
-        prev.map((a) => a._id === updatedAmb._id ? updatedAmb : a)
-      );
-      // If this is our current vehicle and it just became available,
-      // it means the trip was completed — don't wipe state here, the user
-      // sees the completed screen and can end session themselves.
+      setAmbulances((prev) => prev.map((a) => (a._id === updatedAmb._id ? updatedAmb : a)));
     };
 
-    // dispatch:reset fires on a manual demo reset — clear everything
     const onDemoReset = () => {
       setCall(null);
       setTrip(null);
       setAmbulance(null);
       localStorage.removeItem('driverSession');
       setShowVehicleSelect(true);
+      syncFleetAndActiveCalls();
     };
 
     socket.on('driver:incoming-call', onIncomingCall);
@@ -622,8 +688,7 @@ export default function Driver() {
     socket.on('trip:updated', onTripUpdated);
     socket.on('ambulance:updated', onAmbulanceUpdated);
     socket.on('demo:reset', onDemoReset);
-    // dispatch:reset is emitted after trip completes — don't blindly clear state
-    // so the completed screen stays visible until the user clicks 'End Session'
+    socket.on('ambulances:reset', onDemoReset);
 
     return () => {
       socket.off('driver:incoming-call', onIncomingCall);
@@ -631,15 +696,15 @@ export default function Driver() {
       socket.off('trip:updated', onTripUpdated);
       socket.off('ambulance:updated', onAmbulanceUpdated);
       socket.off('demo:reset', onDemoReset);
+      socket.off('ambulances:reset', onDemoReset);
     };
-  }, []);
+  }, [syncFleetAndActiveCalls]);
 
   // When ambulance changes, join its socket room
   useEffect(() => {
     if (!ambulance?._id) return;
     socket.emit('driver:join', ambulance._id);
-    // Do NOT restore old calls from DB — user explicitly selected this vehicle fresh
-  }, [ambulance?._id]); // eslint-disable-line
+  }, [ambulance?._id]);
 
   const accept = async () => {
     const tripId = call?.tripId || call?.ambulance?.activeCall?.tripId;
@@ -670,7 +735,7 @@ export default function Driver() {
 
   return (
     <main className="driver">
-      {/* Control bar — always at top */}
+      {/* Control bar */}
       <DriverBar
         autoFollow={autoFollow}
         onToggleAutoFollow={toggleAutoFollow}
@@ -678,7 +743,7 @@ export default function Driver() {
         onChangeVehicle={changeVehicle}
       />
 
-      {/* Dispatch banner — always mounted, always receives socket events */}
+      {/* Global Dispatch Banner */}
       <GlobalDispatchBanner
         currentAmbulanceId={ambulance?._id}
         onClaimAndAccept={(claimedCall) => {
@@ -687,7 +752,7 @@ export default function Driver() {
         }}
       />
 
-      {/* Vehicle selection screen — shown when user is picking a vehicle */}
+      {/* Vehicle selection screen */}
       {showVehicleSelect ? (
         <VehicleSelectScreen
           onSelect={selectAmbulance}

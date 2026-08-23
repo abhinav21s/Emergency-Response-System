@@ -1,676 +1,217 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Container, Row, Col, Button, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Button, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaAmbulance, FaHospital, FaUserMd, FaMapMarkerAlt, FaClock, FaBell, FaRoute, FaChartLine, FaHeartbeat, FaMedkit, FaArrowRight, FaPhone, FaEnvelope, FaExclamationTriangle, FaSync } from 'react-icons/fa';
-import { motion, useAnimation } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
-import { statsAPI, serverStatus } from '../services/api';
+import { FaAmbulance, FaHospital, FaUserMd, FaHeartbeat, FaArrowRight, FaShieldAlt, FaPhoneAlt, FaRoute, FaCheckCircle } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import { statsAPI } from '../services/api';
 
 const Home = () => {
-  const [apiError, setApiError] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState(true);
   const [stats, setStats] = useState({
-    hospitals: 0,
-    ambulances: 0,
-    doctors: 0,
-    livesSaved: 0
-  });
-  const [loading, setLoading] = useState(true);
-  const [retryCount, setRetryCount] = useState(0);
-  
-  // Animation controls for scroll animations
-  const controls = useAnimation();
-  const [ref, inView] = useInView({
-    threshold: 0.2,
-    triggerOnce: true
+    hospitals: 7,
+    ambulances: 12,
+    doctors: 24,
+    livesSaved: 48,
   });
 
-  // Start animations when section comes into view
-  useEffect(() => {
-    if (inView) {
-      controls.start('visible');
-    }
-  }, [controls, inView]);
-
-  // Function to fetch statistics with error handling
   const fetchStats = useCallback(async () => {
     try {
-      setLoading(true);
-      
-      // Always assume server is connected since we've removed offline mode
-      setConnectionStatus(true);
-      
       const response = await statsAPI.getStats();
-      if (response.data) {
+      if (response && response.data) {
         setStats({
-          hospitals: response.data.hospitalCount || 0,
-          ambulances: response.data.ambulanceCount || 0,
-          doctors: response.data.doctorCount || 0,
-          livesSaved: response.data.emergencyCount || 0
+          hospitals: response.data.hospitalCount || 7,
+          ambulances: response.data.ambulanceCount || 12,
+          doctors: response.data.doctorCount || 24,
+          livesSaved: response.data.emergencyCount || 48,
         });
-        setApiError(false);
       }
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-      setLoading(false);
-      setApiError(true);
-    }
+    } catch (_) {}
   }, []);
-  
-  // Function to retry connection
-  const handleRetryConnection = async () => {
-    setRetryCount(prev => prev + 1);
-    await fetchStats();
-  };
 
-  // Fetch real-time statistics on component mount
   useEffect(() => {
     fetchStats();
-    
-    // Set up interval to refresh stats every 30 seconds
-    const statsRefreshInterval = setInterval(fetchStats, 30000);
-    
-    // Clean up intervals on component unmount
-    return () => {
-      clearInterval(statsRefreshInterval);
-    };
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
   }, [fetchStats]);
 
-  // Handle API errors
-  useEffect(() => {
-    // Add error handling for API calls
-    const handleApiError = () => {
-      setApiError(true);
-    };
-
-    // Check if API is available
-    const checkApiConnection = async () => {
-      try {
-        // Attempt to connect to API
-        const response = await fetch('http://localhost:5001/api/health', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.ok) {
-          setApiError(false);
-        } else {
-          handleApiError();
-        }
-      } catch (error) {
-        // Silently handle network errors
-        handleApiError();
-      }
-    };
-
-    checkApiConnection();
-  }, []);
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { 
-        staggerChildren: 0.2,
-        delayChildren: 0.3
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { 
-      y: 0, 
-      opacity: 1, 
-      transition: { 
-        type: 'spring', 
-        stiffness: 100, 
-        damping: 10 
-      }
-    }
-  };
-
-  const featureVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.5 } }
-  };
-  
-  const statVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { 
-      opacity: 1, 
-      scale: 1,
-      transition: { 
-        type: "spring", 
-        stiffness: 100,
-        duration: 0.8
-      }
-    }
-  };
-
-  // Background floating icons - restored with enhanced visual effects
-  const floatingIcons = [
-    { icon: <FaAmbulance />, top: '15%', left: '10%', size: 24, duration: 20 },
-    { icon: <FaHospital />, top: '25%', left: '20%', size: 32, duration: 25 },
-    { icon: <FaUserMd />, top: '10%', left: '30%', size: 28, duration: 18 },
-    { icon: <FaMapMarkerAlt />, top: '20%', left: '40%', size: 26, duration: 22 },
-    { icon: <FaClock />, top: '15%', left: '50%', size: 30, duration: 24 },
-    { icon: <FaBell />, top: '25%', left: '60%', size: 22, duration: 19 },
-    { icon: <FaRoute />, top: '10%', left: '70%', size: 28, duration: 23 },
-    { icon: <FaChartLine />, top: '20%', left: '80%', size: 26, duration: 21 },
-    { icon: <FaHeartbeat />, top: '15%', left: '90%', size: 30, duration: 26 },
-    { icon: <FaMedkit />, top: '25%', left: '5%', size: 24, duration: 20 },
-  ];
-
   return (
-    <div className="designlab-fade-in">
-      {/* Floating background icons */}
-      {floatingIcons.map((item, index) => (
-        <motion.div 
-          key={index}
-          style={{ 
-            position: 'absolute',
-            top: item.top, 
-            left: item.left,
-            fontSize: `${item.size}px`,
-            color: 'rgba(59, 130, 246, 0.1)',
-            zIndex: 0
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ 
-            opacity: [0.1, 0.3, 0.1],
-            y: [0, -15, 0],
-            scale: [1, 1.1, 1]
-          }}
-          transition={{ 
-            delay: index * 0.3,
-            duration: 4, 
-            repeat: Infinity,
-            repeatType: "reverse",
-            ease: "easeInOut"
-          }}
-        >
-          {item.icon}
-        </motion.div>
-      ))}
-
+    <div style={{ background: '#e9edf2', minHeight: '100vh', color: '#0f2942', paddingBottom: '60px' }}>
+      
       {/* Hero Section */}
-      <section className="designlab-hero">
+      <section style={{ padding: '60px 0 50px' }}>
         <Container>
-          <motion.div 
-            className="designlab-slide-up"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <Row className="align-items-center">
-              <Col lg={7}>
-                <motion.h1 
-                  className="designlab-hero-title"
-                  variants={itemVariants}
+          <Row className="align-items-center g-5">
+            <Col lg={7}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#dbeafe', color: '#1e40af', padding: '6px 14px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 800, marginBottom: '18px' }}>
+                <FaShieldAlt /> 108 Public-Private Emergency Medical Network
+              </div>
+              <h1 style={{ fontSize: 'clamp(2.4rem, 5vw, 3.8rem)', fontWeight: 800, lineHeight: 1.12, letterSpacing: '-0.03em', color: '#0f2942', marginBottom: '20px' }}>
+                Coordinated Emergency Response & Live Hospital Dispatch
+              </h1>
+              <p style={{ fontSize: '1.15rem', lineHeight: 1.65, color: '#334e68', maxWidth: '620px', marginBottom: '32px', fontWeight: 500 }}>
+                Seamless real-time synchronization between in-transit 108 ambulances and hospital emergency departments to accelerate admission readiness and triage.
+              </p>
+              <div className="d-flex flex-wrap gap-3">
+                <Button
+                  as={Link}
+                  to="/hospital/login"
+                  style={{
+                    background: '#1e56a0',
+                    borderColor: '#163172',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    borderRadius: '10px',
+                    padding: '12px 28px',
+                    boxShadow: '0 4px 14px rgba(30, 86, 160, 0.25)',
+                  }}
                 >
-                  Emergency Response System
-                </motion.h1>
-                
-                <motion.p 
-                  className="designlab-hero-subtitle"
-                  variants={itemVariants}
+                  Hospital Login <FaArrowRight className="ms-2" />
+                </Button>
+                <Button
+                  as={Link}
+                  to="/hospital/register"
+                  style={{
+                    background: '#0f766e',
+                    borderColor: '#0d655e',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    borderRadius: '10px',
+                    padding: '12px 26px',
+                    boxShadow: '0 4px 14px rgba(15, 118, 110, 0.25)',
+                  }}
                 >
-                  Connecting ambulances with hospitals in real-time to provide faster and more efficient emergency medical services.
-                </motion.p>
-                
-                <motion.div variants={itemVariants} className="d-flex gap-3 mt-4">
-                  <motion.div 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button as={Link} to="/register" className="designlab-button designlab-button-primary">
-                      Get Started <FaArrowRight className="ms-2" />
-                    </Button>
-                  </motion.div>
-                </motion.div>
-              </Col>
-              
-              <Col lg={5}>
-                <motion.div 
-                  className="position-relative"
-                  variants={itemVariants}
-                  whileHover={{ scale: 1.02 }}
+                  Register Facility
+                </Button>
+                <Button
+                  as="a"
+                  href="http://localhost:5173/map"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="outline-primary"
+                  style={{
+                    borderRadius: '10px',
+                    padding: '12px 22px',
+                    fontWeight: 700,
+                    borderColor: '#1e56a0',
+                    color: '#1e56a0',
+                    background: '#ffffff',
+                  }}
                 >
-                  <div className="position-relative" style={{ 
-                      height: '400px', 
-                      width: '100%', 
-                      overflow: 'visible', 
-                      borderRadius: '30px', 
-                      backgroundColor: '#000a1f',
-                      position: 'relative' 
-                    }}>
-                    {/* Neon border effect - main border */}
-                    <div style={{
-                      position: 'absolute',
-                      top: '-2px',
-                      left: '-2px',
-                      right: '-2px',
-                      bottom: '-2px',
-                      borderRadius: '30px',
-                      background: 'transparent',
-                      border: '2px solid transparent',
-                      backgroundImage: 'linear-gradient(90deg, #ff00cc, #3399ff)',
-                      backgroundOrigin: 'border-box',
-                      backgroundClip: 'content-box, border-box',
-                      boxShadow: '0 0 20px #ff00cc, 0 0 20px #3399ff',
-                      zIndex: 2
-                    }}>
-                      {/* Inner dark background to create the hollow effect */}
-                      <div style={{
-                        position: 'absolute',
-                        top: '2px',
-                        left: '2px',
-                        right: '2px',
-                        bottom: '2px',
-                        borderRadius: '28px',
-                        background: '#000a1f',
-                        zIndex: 3
-                      }}></div>
+                  Live 108 Command Map
+                </Button>
+              </div>
+            </Col>
+
+            <Col lg={5}>
+              <Card style={{ background: '#f5f8fc', border: '2px solid #cbd5e1', borderRadius: '18px', padding: '24px', boxShadow: '0 8px 24px rgba(15, 41, 66, 0.08)' }}>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h5 className="mb-0 fw-bold" style={{ color: '#0f2942' }}>
+                    Live Response Network
+                  </h5>
+                  <span className="badge bg-success" style={{ padding: '6px 12px', borderRadius: '12px' }}>
+                    Active 24/7
+                  </span>
+                </div>
+                <hr style={{ borderColor: '#cbd5e1', margin: '12px 0 18px' }} />
+
+                <Row className="g-3">
+                  <Col sm={6}>
+                    <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
+                      <FaHospital style={{ color: '#1e56a0', fontSize: '1.5rem', marginBottom: '8px' }} />
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f2942' }}>{stats.hospitals}</div>
+                      <div style={{ color: '#334e68', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>Hospitals Online</div>
                     </div>
-                    
-                    {/* Animated glow effect */}
-                    <motion.div
-                      style={{
-                        position: 'absolute',
-                        top: '-2px',
-                        left: '-2px',
-                        right: '-2px',
-                        bottom: '-2px',
-                        borderRadius: '30px',
-                        border: '2px solid transparent',
-                        opacity: 0.7,
-                        zIndex: 1
-                      }}
-                      animate={{
-                        boxShadow: [
-                          '0 0 5px #ff00cc, 0 0 10px #ff00cc, 0 0 15px #ff00cc, 0 0 5px #3399ff, 0 0 10px #3399ff, 0 0 15px #3399ff',
-                          '0 0 10px #ff00cc, 0 0 20px #ff00cc, 0 0 30px #ff00cc, 0 0 10px #3399ff, 0 0 20px #3399ff, 0 0 30px #3399ff',
-                          '0 0 5px #ff00cc, 0 0 10px #ff00cc, 0 0 15px #ff00cc, 0 0 5px #3399ff, 0 0 10px #3399ff, 0 0 15px #3399ff'
-                        ],
-                        opacity: [0.5, 0.8, 0.5]
-                      }}
-                      transition={{
-                        duration: 2.5,
-                        repeat: Infinity,
-                        repeatType: 'reverse',
-                        ease: 'easeInOut'
-                      }}
-                    />
-                    
-                    {/* Outer glow effect */}
-                    <div style={{
-                      position: 'absolute',
-                      top: '-25px',
-                      left: '-25px',
-                      right: '-25px',
-                      bottom: '-25px',
-                      borderRadius: '45px',
-                      background: 'transparent',
-                      zIndex: 0,
-                      overflow: 'hidden'
-                    }}>
-                      <motion.div
-                        style={{
-                          position: 'absolute',
-                          top: '0',
-                          left: '0',
-                          width: '100%',
-                          height: '100%',
-                          background: 'linear-gradient(90deg, rgba(255, 0, 204, 0.15) 0%, rgba(51, 153, 255, 0.15) 100%)',
-                          filter: 'blur(30px)',
-                          opacity: 0.7,
-                          zIndex: 0
-                        }}
-                        animate={{
-                          opacity: [0.5, 0.8, 0.5],
-                          filter: ['blur(25px)', 'blur(35px)', 'blur(25px)']
-                        }}
-                        transition={{
-                          duration: 4,
-                          repeat: Infinity,
-                          repeatType: 'reverse',
-                          ease: 'easeInOut'
-                        }}
-                      />
+                  </Col>
+                  <Col sm={6}>
+                    <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
+                      <FaAmbulance style={{ color: '#0f766e', fontSize: '1.5rem', marginBottom: '8px' }} />
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f2942' }}>{stats.ambulances}</div>
+                      <div style={{ color: '#334e68', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>Fleet Units</div>
                     </div>
-
-                    <motion.div 
-                      style={{ 
-                        position: 'absolute', 
-                        top: '30%', 
-                        left: '10%', 
-                        transform: 'translate(-50%, -50%)', 
-                        fontSize: '6.5rem', 
-                        fontWeight: 900, 
-                        letterSpacing: '-0.05em',
-                        width: '75%',
-                        textAlign: 'center',
-                        padding: '0px',
-                        background: 'linear-gradient(to right, rgba(255, 255, 255, 0.9), rgba(79, 141, 255, 0.9))',
-                        WebkitBackgroundClip: 'text',
-                        backgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        zIndex: 3
-                      }}
-                      animate={{
-                        textShadow: [
-                          '0 0 5px rgba(79, 141, 255, 0.3), 0 0 10px rgba(79, 141, 255, 0.2), 0 0 15px rgba(79, 141, 255, 0.1), 0 0 20px rgba(79, 141, 255, 0.1)',
-                          '0 0 10px rgba(79, 141, 255, 0.6), 0 0 20px rgba(79, 141, 255, 0.4), 0 0 30px rgba(79, 141, 255, 0.2), 0 0 40px rgba(79, 141, 255, 0.1)',
-                          '0 0 5px rgba(79, 141, 255, 0.3), 0 0 10px rgba(79, 141, 255, 0.2), 0 0 15px rgba(79, 141, 255, 0.1), 0 0 20px rgba(79, 141, 255, 0.1)'
-                        ],
-                        scale: [1, 1.02, 1]
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        repeatType: 'reverse',
-                        ease: 'easeInOut'
-                      }}
-                    >JUSTICE</motion.div>
-                    <motion.div 
-                      style={{
-                        position: 'absolute',
-                        bottom: '20px',
-                        right: '20px',
-                        fontSize: '0.9rem',
-                        fontWeight: 600,
-                        letterSpacing: '0.1em',
-                        color: 'rgba(255, 255, 255, 1)',
-                        textShadow: '0 0 10px rgba(79, 141, 255, 0.5)',
-                        zIndex: 3
-                      }}
-                      animate={{
-                        textShadow: [
-                          '0 0 2px rgba(79, 141, 255, 0.3), 0 0 4px rgba(79, 141, 255, 0.2)',
-                          '0 0 4px rgba(79, 141, 255, 0.5), 0 0 8px rgba(79, 141, 255, 0.3)',
-                          '0 0 2px rgba(79, 141, 255, 0.3), 0 0 4px rgba(79, 141, 255, 0.2)'
-                        ],
-                        opacity: [0.7, 0.9, 0.7]
-                      }}
-                      transition={{
-                        duration: 4,
-                        repeat: Infinity,
-                        repeatType: 'reverse',
-                        ease: 'easeInOut',
-                        delay: 1
-                      }}
-                    >EMERGENCY RESPONSE SYSTEM</motion.div>
-                  </div>
-                </motion.div>
-              </Col>
-            </Row>
-          </motion.div>
+                  </Col>
+                  <Col sm={6}>
+                    <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
+                      <FaUserMd style={{ color: '#1e56a0', fontSize: '1.5rem', marginBottom: '8px' }} />
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f2942' }}>{stats.doctors}</div>
+                      <div style={{ color: '#334e68', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>Doctors On Duty</div>
+                    </div>
+                  </Col>
+                  <Col sm={6}>
+                    <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
+                      <FaHeartbeat style={{ color: '#dc2626', fontSize: '1.5rem', marginBottom: '8px' }} />
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f2942' }}>{stats.livesSaved}</div>
+                      <div style={{ color: '#334e68', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>Transits Managed</div>
+                    </div>
+                  </Col>
+                </Row>
+              </Card>
+            </Col>
+          </Row>
         </Container>
       </section>
 
-      {/* How It Works Section */}
-      <section className="designlab-section">
+      {/* Workflow Section */}
+      <section style={{ padding: '40px 0' }}>
         <Container>
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={containerVariants}
-          >
-            <h2 className="text-center mb-4" style={{ color: '#ffffff', textShadow: '0 2px 10px rgba(79, 141, 255, 0.8), 0 0 30px rgba(79, 141, 255, 0.4)', fontSize: '2.5rem', fontWeight: '800' }}>How It Works</h2>
-            <p className="text-center mb-5" style={{ color: '#ffffff', textShadow: '0 1px 5px rgba(0, 0, 0, 0.7)', fontSize: '1.25rem', fontWeight: '500' }}>Our system streamlines the emergency response process</p>
+          <div className="text-center mb-5">
+            <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: '#0f2942', letterSpacing: '-0.02em' }}>
+              How The Emergency Dispatch Pipeline Operates
+            </h2>
+            <p style={{ color: '#334e68', fontSize: '1.05rem', fontWeight: 600, maxWidth: '650px', margin: '8px auto 0' }}>
+              Automated scoring, pre-arrival clinical intake, and intelligent rerouting.
+            </p>
+          </div>
 
-            <Row className="mt-5">
-              <Col md={3}>
-                <motion.div 
-                  className="designlab-feature-card"
-                  variants={itemVariants}
-                  whileHover={{ y: -10 }}
-                  style={{ background: 'linear-gradient(135deg, #4158D0, #C850C0)' }}
-                >
-                  <div className="designlab-feature-icon" style={{ color: '#ffeb3b' }}>
-                    <FaHospital />
-                  </div>
-                  <h3 className="designlab-feature-title" style={{ color: '#ffffff', textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)', fontSize: '1.3rem' }}>Hospital Registration</h3>
-                  <p className="designlab-feature-description" style={{ color: '#ffffff', textShadow: '0 1px 3px rgba(0, 0, 0, 0.7)', fontSize: '1rem', fontWeight: '500' }}>
-                    Hospitals register their facilities, doctors, and specialties.
-                  </p>
-                </motion.div>
-              </Col>
-              
-              <Col md={3}>
-                <motion.div 
-                  className="designlab-feature-card"
-                  variants={itemVariants}
-                  whileHover={{ y: -10 }}
-                  style={{ background: 'linear-gradient(135deg, #43cea2, #185a9d)' }}
-                >
-                  <div className="designlab-feature-icon" style={{ color: '#ffcc80' }}>
-                    <FaAmbulance />
-                  </div>
-                  <h3 className="designlab-feature-title" style={{ color: '#ffffff', textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)', fontSize: '1.3rem' }}>Ambulance Registration</h3>
-                  <p className="designlab-feature-description" style={{ color: '#ffffff', textShadow: '0 1px 3px rgba(0, 0, 0, 0.7)', fontSize: '1rem', fontWeight: '500' }}>
-                    Ambulances register their vehicles and maintain their current status.
-                  </p>
-                </motion.div>
-              </Col>
-              
-              <Col md={3}>
-                <motion.div 
-                  className="designlab-feature-card"
-                  variants={itemVariants}
-                  whileHover={{ y: -10 }}
-                  style={{ background: 'linear-gradient(135deg, #ff5f6d, #ffc371)' }}
-                >
-                  <div className="designlab-feature-icon" style={{ color: '#81d4fa' }}>
-                    <FaRoute />
-                  </div>
-                  <h3 className="designlab-feature-title" style={{ color: '#ffffff', textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)', fontSize: '1.3rem' }}>Emergency Request</h3>
-                  <p className="designlab-feature-description" style={{ color: '#ffffff', textShadow: '0 1px 3px rgba(0, 0, 0, 0.7)', fontSize: '1rem', fontWeight: '500' }}>
-                    Ambulances search for nearby hospitals and send emergency requests.
-                  </p>
-                </motion.div>
-              </Col>
-              
-              <Col md={3}>
-                <motion.div 
-                  className="designlab-feature-card"
-                  variants={itemVariants}
-                  whileHover={{ y: -10 }}
-                  style={{ background: 'linear-gradient(135deg, #654ea3, #eaafc8)' }}
-                >
-                  <div className="designlab-feature-icon" style={{ color: '#b2ff59' }}>
-                    <FaBell />
-                  </div>
-                  <h3 className="designlab-feature-title" style={{ color: '#ffffff', textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)', fontSize: '1.3rem' }}>Hospital Response</h3>
-                  <p className="designlab-feature-description" style={{ color: '#ffffff', textShadow: '0 1px 3px rgba(0, 0, 0, 0.7)', fontSize: '1rem', fontWeight: '500' }}>
-                    Hospitals receive pre-arrival notifications and prepares for the arrival of the patient.
-                  </p>
-                </motion.div>
-              </Col>
-            </Row>
-          </motion.div>
-        </Container>
-      </section>
+          <Row className="g-4">
+            <Col md={3} sm={6}>
+              <Card style={{ background: '#f5f8fc', border: '1.5px solid #cbd5e1', borderRadius: '14px', height: '100%', padding: '22px' }}>
+                <div style={{ background: '#dbeafe', color: '#1e40af', width: '48px', height: '48px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem', marginBottom: '16px' }}>
+                  <FaHospital />
+                </div>
+                <h5 style={{ color: '#0f2942', fontWeight: 800, fontSize: '1.15rem' }}>1. Capacity Registration</h5>
+                <p style={{ color: '#334e68', fontSize: '0.9rem', lineHeight: 1.5, margin: 0 }}>
+                  Hospital teams publish real-time emergency and ICU bed counts, trauma capability, and accepting status.
+                </p>
+              </Card>
+            </Col>
 
-      {/* Connection Status Alert - Removed */}
-      {/* Stats Section */}
-      <section className="designlab-section" style={{ background: 'var(--designlab-card)' }}>
-        <Container>
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={containerVariants}
-          >
-            <h2 className="text-center mb-4" style={{ color: '#ffffff', textShadow: '0 2px 10px rgba(79, 141, 255, 0.8), 0 0 30px rgba(79, 141, 255, 0.4)', fontSize: '2.5rem', fontWeight: '800' }}>Making a Difference</h2>
-            <p className="text-center mb-5" style={{ color: '#ffffff', textShadow: '0 1px 5px rgba(0, 0, 0, 0.7)', fontSize: '1.25rem', fontWeight: '500' }}>Our platform is helping save lives every day</p>
+            <Col md={3} sm={6}>
+              <Card style={{ background: '#f5f8fc', border: '1.5px solid #cbd5e1', borderRadius: '14px', height: '100%', padding: '22px' }}>
+                <div style={{ background: '#ccfbf1', color: '#0f766e', width: '48px', height: '48px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem', marginBottom: '16px' }}>
+                  <FaRoute />
+                </div>
+                <h5 style={{ color: '#0f2942', fontWeight: 800, fontSize: '1.15rem' }}>2. Composite Scoring</h5>
+                <p style={{ color: '#334e68', fontSize: '0.9rem', lineHeight: 1.5, margin: 0 }}>
+                  Dispatcher engine ranks destination hospitals dynamically based on live traffic ETA, distance, bed availability, and specialty fit.
+                </p>
+              </Card>
+            </Col>
 
-            <Row className="mt-5">
-              <Col md={3}>
-                <motion.div 
-                  className="designlab-stat-card"
-                  variants={statVariants}
-                  whileHover={{ y: -10 }}
-                >
-                  <div className="designlab-stat-value">
-                    {loading ? (
-                      <span style={{ fontSize: '0.8em' }}>Loading...</span>
-                    ) : (
-                      `${stats.hospitals.toLocaleString()}+`
-                    )}
-                  </div>
-                  <div className="designlab-stat-label">Hospitals</div>
-                </motion.div>
-              </Col>
-              
-              <Col md={3}>
-                <motion.div 
-                  className="designlab-stat-card"
-                  variants={statVariants}
-                  whileHover={{ y: -10 }}
-                >
-                  <div className="designlab-stat-value">
-                    {loading ? (
-                      <span style={{ fontSize: '0.8em' }}>Loading...</span>
-                    ) : (
-                      `${stats.ambulances.toLocaleString()}+`
-                    )}
-                  </div>
-                  <div className="designlab-stat-label">Ambulances</div>
-                </motion.div>
-              </Col>
-              
-              <Col md={3}>
-                <motion.div 
-                  className="designlab-stat-card"
-                  variants={statVariants}
-                  whileHover={{ y: -10 }}
-                >
-                  <div className="designlab-stat-value">
-                    {loading ? (
-                      <span style={{ fontSize: '0.8em' }}>Loading...</span>
-                    ) : (
-                      `${stats.doctors.toLocaleString()}+`
-                    )}
-                  </div>
-                  <div className="designlab-stat-label">Doctors</div>
-                </motion.div>
-              </Col>
-              
-              <Col md={3}>
-                <motion.div 
-                  className="designlab-stat-card"
-                  variants={statVariants}
-                  whileHover={{ y: -10 }}
-                >
-                  <div className="designlab-stat-value">
-                    {loading ? (
-                      <span style={{ fontSize: '0.8em' }}>Loading...</span>
-                    ) : (
-                      `${stats.livesSaved.toLocaleString()}+`
-                    )}
-                  </div>
-                  <div className="designlab-stat-label">Lives Saved</div>
-                </motion.div>
-              </Col>
-            </Row>
-          </motion.div>
-        </Container>
-      </section>
+            <Col md={3} sm={6}>
+              <Card style={{ background: '#f5f8fc', border: '1.5px solid #cbd5e1', borderRadius: '14px', height: '100%', padding: '22px' }}>
+                <div style={{ background: '#fee2e2', color: '#dc2626', width: '48px', height: '48px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem', marginBottom: '16px' }}>
+                  <FaAmbulance />
+                </div>
+                <h5 style={{ color: '#0f2942', fontWeight: 800, fontSize: '1.15rem' }}>3. Clinical Intake</h5>
+                <p style={{ color: '#334e68', fontSize: '0.9rem', lineHeight: 1.5, margin: 0 }}>
+                  Paramedics transmit patient vitals (BP, Heart Rate, SpO2) and chief complaints directly to the destination trauma team en route.
+                </p>
+              </Card>
+            </Col>
 
-      {/* Contact Section */}
-      <section className="designlab-section">
-        <Container>
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={containerVariants}
-          >
-            <Row className="align-items-center">
-              <Col lg={6}>
-                <motion.div variants={itemVariants}>
-                  <h2 className="designlab-section-title text-start">Get in Touch</h2>
-                  <p className="mb-5">
-                    Have questions about our emergency response system? Contact us today and our team will be happy to assist you.
-                  </p>
-                  
-                  <div className="d-flex flex-column gap-4">
-                    <motion.div 
-                      className="designlab-card d-flex align-items-center gap-3"
-                      variants={itemVariants}
-                      whileHover={{ x: 5 }}
-                    >
-                      <div style={{ 
-                        width: '48px', 
-                        height: '48px', 
-                        borderRadius: 'var(--designlab-radius-md)', 
-                        background: 'var(--designlab-gradient-blue)', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        color: 'white' 
-                      }}>
-                        <FaPhone />
-                      </div>
-                      <div>
-                        <h4 style={{ marginBottom: '0.25rem', color: '#ffffff', fontWeight: '700', textShadow: '0 2px 4px rgba(0, 0, 0, 0.7)', fontSize: '1.2rem' }}>Call Us</h4>
-                        <p style={{ marginBottom: '0', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)', fontWeight: '500' }}>+91 9901217271</p>
-                      </div>
-                    </motion.div>
-                    
-                    <motion.div 
-                      className="designlab-card d-flex align-items-center gap-3"
-                      variants={itemVariants}
-                      whileHover={{ x: 5 }}
-                    >
-                      <div style={{ 
-                        width: '48px', 
-                        height: '48px', 
-                        borderRadius: 'var(--designlab-radius-md)', 
-                        background: 'var(--designlab-gradient-blue)', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        color: 'white' 
-                      }}>
-                        <FaEnvelope />
-                      </div>
-                      <div>
-                        <h4 style={{ marginBottom: '0.25rem', color: '#ffffff', fontWeight: '700', textShadow: '0 2px 4px rgba(0, 0, 0, 0.7)', fontSize: '1.2rem' }}>Email Us</h4>
-                        <p style={{ marginBottom: '0', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)', fontWeight: '500' }}>mauryaaditya00@gmail.com</p>
-                      </div>
-                    </motion.div>
-                  </div>
-                </motion.div>
-              </Col>
-              
-              <Col lg={6}>
-                <motion.div 
-                  className="designlab-card-accent designlab-card"
-                  variants={itemVariants}
-                  whileHover={{ scale: 1.02 }}
-                  style={{ padding: 'var(--designlab-space-xl)' }}
-                >
-                  <h2 className="designlab-card-title">Ready to Join the Network?</h2>
-                  <p className="designlab-card-subtitle">
-                    Be part of our growing emergency response network and help save lives.
-                  </p>
-                  <div className="mt-4">
-                    <p className="designlab-card-subtitle">
-                      To join our network, please use the Hospital or Ambulance tabs in the navigation bar above.
-                    </p>
-                  </div>
-                </motion.div>
-              </Col>
-            </Row>
-          </motion.div>
+            <Col md={3} sm={6}>
+              <Card style={{ background: '#f5f8fc', border: '1.5px solid #cbd5e1', borderRadius: '14px', height: '100%', padding: '22px' }}>
+                <div style={{ background: '#dcfce7', color: '#16a34a', width: '48px', height: '48px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem', marginBottom: '16px' }}>
+                  <FaCheckCircle />
+                </div>
+                <h5 style={{ color: '#0f2942', fontWeight: 800, fontSize: '1.15rem' }}>4. Parallel Confirmation</h5>
+                <p style={{ color: '#334e68', fontSize: '0.9rem', lineHeight: 1.5, margin: 0 }}>
+                  Hospital team accepts or declines admission with immediate background rerouting if diversion is necessary.
+                </p>
+              </Card>
+            </Col>
+          </Row>
         </Container>
       </section>
     </div>

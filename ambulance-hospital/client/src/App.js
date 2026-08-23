@@ -45,10 +45,10 @@ function App() {
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
 
-            {/* Login — redirect to dashboard if already authenticated */}
+            {/* Unified Hospital Login Route */}
             <Route
               path="/login"
-              element={user ? <Navigate to="/hospital/dashboard" /> : <Login />}
+              element={user ? <Navigate to="/hospital/dashboard" /> : <HospitalLogin />}
             />
             <Route
               path="/hospital/login"

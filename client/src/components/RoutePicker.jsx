@@ -157,7 +157,7 @@ export default function RoutePicker({ origin, destination, leg, trip, onChosen, 
               disabled={chosen !== null}
               style={{ '--route-color': ROUTE_COLORS[i] || '#888' }}
             >
-              <span className="route-card-dot" />
+              <span className="route-card-dot" style={{ backgroundColor: ROUTE_COLORS[i] || '#888' }} />
               <div className="route-card-body">
                 <strong className="route-card-label">Route {i + 1}</strong>
                 <span className="route-card-km">{km} km</span>

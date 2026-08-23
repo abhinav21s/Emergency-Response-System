@@ -36,6 +36,11 @@ const emergencySchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  tripId: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   patient: {
     name: {
       type: String,

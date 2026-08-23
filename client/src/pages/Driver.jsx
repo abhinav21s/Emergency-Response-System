@@ -6,11 +6,12 @@ import { api } from '../api';
 import { socket } from '../socket';
 import RoutePicker from '../components/RoutePicker';
 import ArrivalCountdown from '../components/ArrivalCountdown';
+import ClinicalIntakeModal from '../components/ClinicalIntakeModal';
 
 const tomTomKey = import.meta.env.VITE_TOMTOM_API_KEY || 'YiM8ZHJlnpK4TezEC0VhMMKhd7FqnJ42';
+const HOSPITAL_TIMEOUT_SECONDS = 15; // 15s countdown for demo mode
 
 // ─── Global Incoming Dispatch Banner ──────────────────────────────────────────
-// Always mounted — checks active calls on mount AND listens to socket broadcasts
 function GlobalDispatchBanner({ onClaimAndAccept, currentAmbulanceId }) {
   const [activeCalls, setActiveCalls] = useState([]);
 
@@ -35,7 +36,6 @@ function GlobalDispatchBanner({ onClaimAndAccept, currentAmbulanceId }) {
   }, []);
 
   useEffect(() => {
-    // Initial fetch of any currently active dispatches
     syncActiveCallsFromFleet();
 
     const onCall = (dispatch) => {
@@ -113,7 +113,7 @@ function GlobalDispatchBanner({ onClaimAndAccept, currentAmbulanceId }) {
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '16px',
-              boxShadow: '0 4px 14px rgba(220,38,38,0.2)'
+              boxShadow: '0 4px 14px rgba(220,38,38,0.2)',
             }}
           >
             <div>
@@ -122,7 +122,7 @@ function GlobalDispatchBanner({ onClaimAndAccept, currentAmbulanceId }) {
               </div>
               <div style={{ fontSize: '0.85rem', color: '#7f1d1d', marginTop: '2px' }}>
                 Accident: {callItem.accident?.lat?.toFixed(4)}, {callItem.accident?.lng?.toFixed(4)}
-                {callItem.distanceKm ? ` &bull; ${callItem.distanceKm} km (ETA ${callItem.etaMinutes} min)` : ''}
+                {callItem.distanceKm ? ` • ${callItem.distanceKm} km (ETA ${callItem.etaMinutes} min)` : ''}
               </div>
             </div>
             <button
@@ -136,7 +136,7 @@ function GlobalDispatchBanner({ onClaimAndAccept, currentAmbulanceId }) {
                 border: 'none',
                 borderRadius: '8px',
                 fontWeight: 700,
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
               onClick={() => {
                 onClaimAndAccept(callItem);
@@ -165,7 +165,7 @@ function DriverBar({ autoFollow, onToggleAutoFollow, ambulance, onChangeVehicle 
       alignItems: 'center',
       justifyContent: 'space-between',
       flexWrap: 'wrap',
-      gap: '12px'
+      gap: '12px',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
         <Link to="/" style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', color: '#1359bd', textDecoration: 'none' }}>
@@ -192,7 +192,7 @@ function DriverBar({ autoFollow, onToggleAutoFollow, ambulance, onChangeVehicle 
             fontWeight: 700,
             fontSize: '0.8rem',
             cursor: 'pointer',
-            transition: 'all 0.15s'
+            transition: 'all 0.15s',
           }}
         >
           {autoFollow ? 'ON — Auto-tracks dispatches' : 'OFF — Locked to vehicle'}
@@ -210,7 +210,7 @@ function DriverBar({ autoFollow, onToggleAutoFollow, ambulance, onChangeVehicle 
               border: '1px solid #cbd5e1',
               borderRadius: '8px',
               cursor: 'pointer',
-              fontWeight: 600
+              fontWeight: 600,
             }}
           >
             Change Vehicle
@@ -257,7 +257,7 @@ function VehicleSelectScreen({ onSelect, ambulances, loading, error }) {
               borderRadius: '10px',
               textAlign: 'left',
               cursor: 'pointer',
-              transition: 'all 0.15s'
+              transition: 'all 0.15s',
             }}
             onClick={() => {
               setSelectedId(a._id);
@@ -268,14 +268,9 @@ function VehicleSelectScreen({ onSelect, ambulances, loading, error }) {
               width: '40px', height: '40px',
               background: a.type === 'public' ? '#1359bd' : '#0f766e',
               borderRadius: '8px', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', flexShrink: 0
+              justifyContent: 'center', flexShrink: 0,
             }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <rect x="1" y="3" width="15" height="13" rx="2"/>
-                <path d="M16 8h4l3 3v5h-7V8z"/>
-                <circle cx="5.5" cy="18.5" r="2.5"/>
-                <circle cx="18.5" cy="18.5" r="2.5"/>
-              </svg>
+              <span style={{ color: 'white', fontWeight: 800, fontSize: '0.85rem' }}>108</span>
             </div>
             <div style={{ flex: 1 }}>
               <strong style={{ display: 'block', fontSize: '0.95rem', color: '#0f172a' }}>{a.name}</strong>
@@ -296,7 +291,7 @@ function VehicleSelectScreen({ onSelect, ambulances, loading, error }) {
   );
 }
 
-// ─── Hospital Selection with Map ──────────────────────────────────────────────
+// ─── Dynamic Hospital Selection Screen (Composite Score-Driven) ────────────────
 function HospitalSelect({ trip, onChosen }) {
   const [hospitals, setHospitals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -304,19 +299,35 @@ function HospitalSelect({ trip, onChosen }) {
   const [selecting, setSelecting] = useState(null);
   const [selectedSpecialty, setSelectedSpecialty] = useState('all');
 
+  const fetchRankedHospitals = useCallback(async () => {
+    try {
+      setLoading(true);
+      const origin = trip?.accident || { lat: 12.9716, lng: 77.5946 };
+      const excludeParam = (trip?.hospitalAttempts || [])
+        .map((a) => a.hospitalId)
+        .filter(Boolean)
+        .join(',');
+      
+      const res = await api(
+        `/hospitals?lat=${origin.lat}&lng=${origin.lng}&specialty=${selectedSpecialty}&excludeIds=${excludeParam}`
+      );
+      setHospitals(res);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  }, [trip, selectedSpecialty]);
+
   useEffect(() => {
-    const params = trip?.accident ? `?lat=${trip.accident.lat}&lng=${trip.accident.lng}` : '';
-    api(`/hospitals${params}`)
-      .then(setHospitals)
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+    fetchRankedHospitals();
 
     const onHospitalUpdated = (updated) => {
       setHospitals((prev) => prev.map((h) => (h._id === updated._id ? { ...h, ...updated } : h)));
     };
     socket.on('hospital:updated', onHospitalUpdated);
     return () => socket.off('hospital:updated', onHospitalUpdated);
-  }, []); // eslint-disable-line
+  }, [fetchRankedHospitals]);
 
   const choose = async (hospital) => {
     setSelecting(hospital._id);
@@ -328,6 +339,7 @@ function HospitalSelect({ trip, onChosen }) {
             hospitalId: hospital._id,
             name: hospital.name,
             location: { lat: hospital.lat, lng: hospital.lng },
+            compositeScore: hospital.compositeScore,
           },
         }),
       });
@@ -345,31 +357,31 @@ function HospitalSelect({ trip, onChosen }) {
     { key: 'Trauma', label: 'Trauma Care' },
     { key: 'Pediatrics', label: 'Pediatrics' },
     { key: 'Orthopedics', label: 'Orthopedics' },
-    { key: 'icu', label: 'ICU Available' }
+    { key: 'icu', label: 'ICU Available' },
   ];
-
-  const filteredHospitals = hospitals.filter((h) => {
-    if (selectedSpecialty === 'all') return true;
-    if (selectedSpecialty === 'icu') return (h.beds?.icu || 0) > 0;
-    return h.specialties?.some((s) => s.toLowerCase().includes(selectedSpecialty.toLowerCase()));
-  });
-
-  if (loading) return <div className="notice">Loading hospital network near accident scene...</div>;
-  if (error) return <p className="error">{error}</p>;
 
   const accidentCenter = [trip.accident.lat, trip.accident.lng];
 
   return (
     <section className="incoming" style={{ background: '#fff', border: '2px solid #e0e8f1', borderRadius: '16px', padding: '24px' }}>
-      <p style={{ color: '#1359bd', fontWeight: 800, letterSpacing: '0.08em', margin: 0, fontSize: '0.8rem' }}>
-        HOSPITAL HANDOFF — SPECIALTY ROUTING
-      </p>
-      <h2 style={{ fontSize: '1.6rem', color: '#10233c', margin: '4px 0 8px' }}>Select Destination Hospital</h2>
-      <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>
-        Accident scene: <b>{trip.accident.lat.toFixed(4)}, {trip.accident.lng.toFixed(4)}</b> &bull; Sorted by proximity
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+        <div>
+          <p style={{ color: '#1359bd', fontWeight: 800, letterSpacing: '0.08em', margin: 0, fontSize: '0.78rem' }}>
+            INTELLIGENT HOSPITAL MATCHING — COMPOSITE DECISION ENGINE
+          </p>
+          <h2 style={{ fontSize: '1.5rem', color: '#10233c', margin: '4px 0 6px' }}>Select Destination Hospital</h2>
+        </div>
+        <div style={{ background: '#f0fdf4', border: '1px solid #86efac', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', color: '#166534', fontWeight: 700 }}>
+          Ranked by Travel Time, Beds &amp; Specialty
+        </div>
+      </div>
+
+      <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0 0 10px' }}>
+        Accident location: <b>{trip.accident.lat.toFixed(4)}, {trip.accident.lng.toFixed(4)}</b> &bull; Immediate departure upon selection
       </p>
 
-      <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', padding: '12px 0 6px', margin: '8px 0' }}>
+      {/* Specialty Filter Buttons */}
+      <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', padding: '6px 0 10px', margin: '4px 0 10px' }}>
         {SPECIALTY_OPTIONS.map((opt) => (
           <button
             key={opt.key}
@@ -379,8 +391,13 @@ function HospitalSelect({ trip, onChosen }) {
               background: selectedSpecialty === opt.key ? '#1359bd' : '#f1f5f9',
               color: selectedSpecialty === opt.key ? '#fff' : '#334155',
               border: selectedSpecialty === opt.key ? '1px solid #1359bd' : '1px solid #e2e8f0',
-              borderRadius: '20px', padding: '5px 14px', fontSize: '0.82rem',
-              fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s'
+              borderRadius: '20px',
+              padding: '5px 14px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.15s',
             }}
           >
             {opt.label}
@@ -388,7 +405,8 @@ function HospitalSelect({ trip, onChosen }) {
         ))}
       </div>
 
-      <div style={{ height: '220px', borderRadius: '12px', overflow: 'hidden', margin: '12px 0 16px', border: '1px solid #e2e8f0' }}>
+      {/* Map visualization */}
+      <div style={{ height: '200px', borderRadius: '12px', overflow: 'hidden', margin: '8px 0 16px', border: '1px solid #e2e8f0' }}>
         <MapContainer center={accidentCenter} zoom={13} className="map" scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
           <TileLayer
             attribution="&copy; TomTom"
@@ -397,79 +415,239 @@ function HospitalSelect({ trip, onChosen }) {
           <CircleMarker center={accidentCenter} radius={10} pathOptions={{ color: '#dc2626', fillColor: '#ef4444', fillOpacity: 1 }}>
             <Popup>Accident Location</Popup>
           </CircleMarker>
-          {filteredHospitals.map((h) => (
+          {hospitals.map((h, i) => (
             <Marker
               key={h._id}
               position={[h.lat, h.lng]}
               icon={L.divIcon({
                 className: '',
-                html: `<div style="background:#1359bd;color:white;border-radius:4px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,0.3);border:2px solid white;">H</div>`,
-                iconSize: [28, 28], iconAnchor: [14, 28]
+                html: `<div style="background:${i === 0 ? '#16a34a' : '#1359bd'};color:white;border-radius:4px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,0.3);border:2px solid white;">H${i + 1}</div>`,
+                iconSize: [28, 28],
+                iconAnchor: [14, 28],
               })}
             >
               <Popup>
                 <strong>{h.name}</strong><br />
-                {h.distanceKm} km &bull; ICU: {h.beds?.icu || 0}
+                Rank #{i + 1} &bull; {h.distanceKm} km &bull; ICU Beds: {h.beds?.icu || 0}
               </Popup>
             </Marker>
           ))}
         </MapContainer>
       </div>
 
+      {loading && <div className="notice">Evaluating hospital network capacity and travel times...</div>}
+      {error && <p className="error">{error}</p>}
+
+      {/* Hospital Ranked Cards */}
       <div style={{ display: 'grid', gap: '10px' }}>
-        {filteredHospitals.length === 0 && (
-          <p style={{ textAlign: 'center', color: '#64748b', padding: '16px' }}>No hospitals match this filter.</p>
+        {hospitals.length === 0 && !loading && (
+          <p style={{ textAlign: 'center', color: '#64748b', padding: '16px' }}>No suitable hospitals found for this filter.</p>
         )}
-        {filteredHospitals.map((h) => {
+        {hospitals.map((h, index) => {
+          const isTopChoice = index === 0;
           const emergencyBeds = h.beds?.emergency ?? (h.bedsAvailable || 0);
           const icuBeds = h.beds?.icu ?? 0;
+
           return (
             <button
               key={h._id}
+              type="button"
               style={{
-                display: 'flex', alignItems: 'center', gap: '14px',
-                background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: '12px',
-                padding: '14px 16px', cursor: 'pointer', textAlign: 'left',
-                transition: 'all 0.2s', opacity: selecting && selecting !== h._id ? 0.5 : 1
+                display: 'flex',
+                alignItems: 'center',
+                gap: '14px',
+                background: isTopChoice ? '#f8fafd' : '#fff',
+                border: isTopChoice ? '2px solid #1359bd' : '1.5px solid #e2e8f0',
+                borderRadius: '12px',
+                padding: '14px 16px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'all 0.2s',
+                opacity: selecting && selecting !== h._id ? 0.5 : 1,
+                boxShadow: isTopChoice ? '0 4px 12px rgba(19, 89, 189, 0.08)' : 'none',
               }}
               onClick={() => choose(h)}
               disabled={selecting !== null}
             >
-              <div style={{ width: '42px', height: '42px', background: '#1359bd', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-                  <polyline points="9,22 9,12 15,12 15,22"/>
-                </svg>
+              <div
+                style={{
+                  width: '42px',
+                  height: '42px',
+                  background: isTopChoice ? '#1359bd' : '#64748b',
+                  color: 'white',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 800,
+                  fontSize: '1rem',
+                  flexShrink: 0,
+                }}
+              >
+                #{index + 1}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
-                  <strong style={{ fontSize: '0.97rem', color: '#0f172a' }}>{h.name}</strong>
-                  {h.distanceKm != null && (
-                    <span style={{ background: '#dbeafe', color: '#1d4ed8', padding: '2px 7px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>{h.distanceKm} km</span>
+                  <strong style={{ fontSize: '0.98rem', color: '#0f172a' }}>{h.name}</strong>
+                  {isTopChoice && (
+                    <span style={{ background: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.03em' }}>
+                      RECOMMENDED CHOICE
+                    </span>
                   )}
-                  <span style={{ background: '#fee2e2', color: '#991b1b', padding: '2px 7px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700 }}>{h.traumaLevel || 'Level 1'}</span>
+                  {h.distanceKm != null && (
+                    <span style={{ background: '#dbeafe', color: '#1d4ed8', padding: '2px 7px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>
+                      {h.distanceKm} km
+                    </span>
+                  )}
                 </div>
-                <div style={{ display: 'flex', gap: '14px', fontSize: '0.83rem', color: '#475569', flexWrap: 'wrap' }}>
+
+                <div style={{ fontSize: '0.8rem', color: '#0f766e', fontWeight: 600, marginBottom: '4px' }}>
+                  {h.recommendationReason || 'Optimal proximity and bed availability'}
+                </div>
+
+                <div style={{ display: 'flex', gap: '14px', fontSize: '0.8rem', color: '#475569', flexWrap: 'wrap' }}>
                   <span>Emergency Beds: <b>{emergencyBeds}</b></span>
                   <span>ICU Beds: <b style={{ color: icuBeds > 0 ? '#16a34a' : '#dc2626' }}>{icuBeds}</b></span>
-                  <span>Doctors: <b>{h.doctorsOnDuty || h.doctorsAvailable || 0}</b></span>
+                  <span>ETA: <b>~{h.etaMinutes || 5} min</b></span>
                 </div>
-                {h.specialties?.length > 0 && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
-                    {h.specialties.map((spec, i) => (
-                      <span key={i} style={{ background: '#f1f5f9', color: '#334155', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>{spec}</span>
-                    ))}
-                  </div>
-                )}
               </div>
-              <span style={{ color: '#1359bd', fontWeight: 700, fontSize: '0.85rem', flexShrink: 0 }}>
-                {selecting === h._id ? 'Routing...' : 'Select'}
+              <span
+                style={{
+                  color: '#fff',
+                  background: isTopChoice ? '#1359bd' : '#334155',
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  flexShrink: 0,
+                }}
+              >
+                {selecting === h._id ? 'Departing...' : isTopChoice ? 'Depart Now' : 'Select'}
               </span>
             </button>
           );
         })}
       </div>
     </section>
+  );
+}
+
+// ─── Parallel Hospital Confirmation Status Card with Live Timer ───────────────
+function ParallelHospitalStatusCard({ trip, onOpenIntake, onTimeoutTriggered }) {
+  const [secondsRemaining, setSecondsRemaining] = useState(HOSPITAL_TIMEOUT_SECONDS);
+  const status = trip?.hospitalStatus || 'pending';
+  const hospital = trip?.hospital;
+  const timeoutTriggeredRef = useRef(false);
+
+  useEffect(() => {
+    if (status !== 'pending') return;
+    setSecondsRemaining(HOSPITAL_TIMEOUT_SECONDS);
+    timeoutTriggeredRef.current = false;
+
+    const timer = setInterval(() => {
+      setSecondsRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          if (!timeoutTriggeredRef.current) {
+            timeoutTriggeredRef.current = true;
+            if (onTimeoutTriggered) onTimeoutTriggered();
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [hospital?.hospitalId, status]); // eslint-disable-line
+
+  const getStatusBadge = () => {
+    switch (status) {
+      case 'confirmed':
+        return <span style={{ background: '#dcfce7', color: '#166534', padding: '3px 10px', borderRadius: '12px', fontWeight: 800, fontSize: '0.78rem' }}>ADMISSION CONFIRMED</span>;
+      case 'declined':
+        return <span style={{ background: '#fee2e2', color: '#991b1b', padding: '3px 10px', borderRadius: '12px', fontWeight: 800, fontSize: '0.78rem' }}>DECLINED — REROUTING</span>;
+      case 'timeout':
+        return <span style={{ background: '#fef3c7', color: '#92400e', padding: '3px 10px', borderRadius: '12px', fontWeight: 800, fontSize: '0.78rem' }}>TIMEOUT — REROUTING</span>;
+      case 'overridden':
+        return <span style={{ background: '#ffedd5', color: '#c2410c', padding: '3px 10px', borderRadius: '12px', fontWeight: 800, fontSize: '0.78rem' }}>SAFETY OVERRIDE ENGAGED</span>;
+      default:
+        return <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 10px', borderRadius: '12px', fontWeight: 800, fontSize: '0.78rem' }}>AWAITING CONFIRMATION ({secondsRemaining}s)</span>;
+    }
+  };
+
+  return (
+    <div
+      style={{
+        background: status === 'confirmed' ? '#f0fdf4' : status === 'overridden' ? '#fff7ed' : '#ffffff',
+        border: status === 'confirmed' ? '1.5px solid #86efac' : status === 'overridden' ? '1.5px solid #fdba74' : '1.5px solid #cbd5e1',
+        borderRadius: '12px',
+        padding: '14px 18px',
+        marginBottom: '16px',
+        boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+        <div>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Hospital Notification Status
+          </div>
+          <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+            {hospital?.name || 'Destination Hospital'}
+          </div>
+        </div>
+        {getStatusBadge()}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px', flexWrap: 'wrap', gap: '10px' }}>
+        <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
+          {status === 'confirmed' && 'Hospital emergency team is preparing resuscitation bay.'}
+          {status === 'pending' && 'Ambulance is moving en route. Background response window active.'}
+          {status === 'overridden' && 'Safety cap reached. Proceeding to nearest emergency facility.'}
+          {(status === 'declined' || status === 'timeout') && 'Calculating optimal alternate route.'}
+        </p>
+
+        <button
+          type="button"
+          onClick={onOpenIntake}
+          style={{
+            background: '#f1f5f9',
+            border: '1px solid #cbd5e1',
+            color: '#1e293b',
+            borderRadius: '6px',
+            padding: '6px 12px',
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+          }}
+        >
+          {trip?.clinicalIntake ? 'View / Edit Patient Intake' : '+ Record Clinical Intake'}
+        </button>
+      </div>
+
+      {/* Attempt History List (if rerouted) */}
+      {trip?.hospitalAttempts?.length > 1 && (
+        <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #e2e8f0', fontSize: '0.78rem' }}>
+          <span style={{ fontWeight: 700, color: '#475569' }}>Routing History:</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
+            {trip.hospitalAttempts.map((att, idx) => (
+              <span
+                key={idx}
+                style={{
+                  background: att.outcome === 'confirmed' ? '#dcfce7' : att.outcome === 'pending' ? '#e0f2fe' : '#fee2e2',
+                  color: att.outcome === 'confirmed' ? '#166534' : att.outcome === 'pending' ? '#0369a1' : '#991b1b',
+                  padding: '2px 8px',
+                  borderRadius: '6px',
+                  fontWeight: 600,
+                }}
+              >
+                #{idx + 1} {att.hospitalName} ({att.outcome})
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -490,10 +668,14 @@ export default function Driver() {
     () => !localStorage.getItem('driverSession') && localStorage.getItem('driverAutoFollow') !== 'true'
   );
 
+  // New state for clinical intake modal and live interpolation
+  const [showIntakeModal, setShowIntakeModal] = useState(false);
+  const [interpolatedPos, setInterpolatedPos] = useState(null);
+  const [rerouteNotice, setRerouteNotice] = useState('');
+
   const autoFollowRef = useRef(autoFollow);
   autoFollowRef.current = autoFollow;
 
-  // Restore or find latest active dispatch if in AutoFollow mode or for saved ambulance
   const syncFleetAndActiveCalls = useCallback(async () => {
     try {
       const fleet = await api('/ambulances');
@@ -501,7 +683,6 @@ export default function Driver() {
       setLoadingAmbulances(false);
 
       if (autoFollowRef.current) {
-        // If in Auto-Follow mode: find ANY ambulance with an active dispatch
         const activeDispatched = fleet.find((a) => a.status === 'dispatched' && a.activeCall);
         if (activeDispatched) {
           const ac = activeDispatched.activeCall;
@@ -517,7 +698,7 @@ export default function Driver() {
             ambulanceName: activeDispatched.name,
           });
           setShowVehicleSelect(false);
-          if (ac.accepted && ac.tripId) {
+          if (ac.tripId) {
             try {
               const tripData = await api(`/trips/${ac.tripId}`);
               if (tripData) setTrip(tripData);
@@ -525,7 +706,6 @@ export default function Driver() {
           }
         }
       } else {
-        // Locked to vehicle mode: check saved ambulance
         const savedSession = JSON.parse(localStorage.getItem('driverSession') || 'null');
         if (savedSession?._id) {
           const currentFresh = fleet.find((a) => a._id === savedSession._id);
@@ -544,7 +724,7 @@ export default function Driver() {
                 ambulanceName: currentFresh.name,
               });
               setShowVehicleSelect(false);
-              if (ac.accepted && ac.tripId) {
+              if (ac.tripId) {
                 try {
                   const tripData = await api(`/trips/${ac.tripId}`);
                   if (tripData) setTrip(tripData);
@@ -574,12 +754,10 @@ export default function Driver() {
     }
     if (next) {
       setShowVehicleSelect(false);
-      // Immediately sync with any active dispatch
       syncFleetAndActiveCalls();
     }
   };
 
-  // Select an ambulance — fetch fresh status from server and load active trip if dispatched
   const selectAmbulance = async (amb, incomingCall = null) => {
     try {
       const fresh = await api(`/ambulances/${amb._id}`).catch(() => amb);
@@ -607,7 +785,7 @@ export default function Driver() {
         };
         setCall(restoredCall);
         setTrip(null);
-        if (ac.accepted && ac.tripId) {
+        if (ac.tripId) {
           try {
             const tripData = await api(`/trips/${ac.tripId}`);
             if (tripData) setTrip(tripData);
@@ -633,11 +811,50 @@ export default function Driver() {
     setAmbulance(null);
     setCall(null);
     setTrip(null);
+    setShowIntakeModal(false);
+    setRerouteNotice('');
     syncFleetAndActiveCalls();
     setShowVehicleSelect(true);
   };
 
-  // Socket event listeners
+  const tripRef = useRef(trip);
+  tripRef.current = trip;
+
+  const interpolatedPosRef = useRef(interpolatedPos);
+  interpolatedPosRef.current = interpolatedPos;
+
+  // ─── Trigger Reroute on Decline or Timeout ──────────────────────────────────
+  const handleTriggerReroute = useCallback(
+    async (reason = 'Hospital unavailable') => {
+      const currentTrip = tripRef.current;
+      if (!currentTrip?._id) return;
+      const currentPos = interpolatedPosRef.current || currentTrip.accident || { lat: 12.9716, lng: 77.5946 };
+
+      try {
+        setRerouteNotice(`Rerouting from current location (${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)})...`);
+        const res = await api(`/trips/${currentTrip._id}/reroute`, {
+          method: 'POST',
+          body: JSON.stringify({
+            currentPosition: currentPos,
+            requiredSpecialty: 'all',
+          }),
+        });
+
+        if (res.trip) {
+          setTrip(res.trip);
+          tripRef.current = res.trip;
+          setRerouteNotice(res.rerouteReason || `Rerouted to ${res.newHospital?.name}`);
+          setTimeout(() => setRerouteNotice(''), 8000);
+        }
+      } catch (err) {
+        setRerouteNotice(`Reroute notice: ${err.message}`);
+        setTimeout(() => setRerouteNotice(''), 6000);
+      }
+    },
+    []
+  );
+
+  // ─── Socket Event Handlers ──────────────────────────────────────────────────
   useEffect(() => {
     const onIncomingCall = (dispatch) => {
       if (!dispatch) return;
@@ -663,10 +880,48 @@ export default function Driver() {
 
     const onTripUpdated = (updated) => {
       const currentSession = JSON.parse(localStorage.getItem('driverSession') || 'null');
-      if (!currentSession) return;
-      if (String(updated.ambulance) === String(currentSession._id)) {
+      const currentTrip = tripRef.current;
+      const isOurTrip = currentTrip && String(currentTrip._id) === String(updated._id);
+      const isOurAmbulance = currentSession && String(updated.ambulance) === String(currentSession._id);
+
+      if (isOurTrip || isOurAmbulance || autoFollowRef.current) {
         setTrip(updated);
+        tripRef.current = updated;
         setShowVehicleSelect(false);
+      }
+    };
+
+    const onHospitalResponse = (payload) => {
+      const currentTrip = tripRef.current;
+      const isMatch = !payload.tripId || (currentTrip && String(currentTrip._id) === String(payload.tripId));
+      if (currentTrip && isMatch) {
+        setTrip((prev) => (prev ? { ...prev, hospitalStatus: payload.outcome } : prev));
+        if (tripRef.current) {
+          tripRef.current = { ...tripRef.current, hospitalStatus: payload.outcome };
+        }
+        if (payload.outcome === 'declined' || payload.outcome === 'timeout') {
+          handleTriggerReroute(payload.reason);
+        }
+      }
+    };
+
+    const onHospitalDeclined = (payload) => {
+      const currentTrip = tripRef.current;
+      const isMatch = !payload.tripId || (currentTrip && String(currentTrip._id) === String(payload.tripId));
+      if (currentTrip && isMatch) {
+        setTrip((prev) => (prev ? { ...prev, hospitalStatus: 'declined' } : prev));
+        if (tripRef.current) {
+          tripRef.current = { ...tripRef.current, hospitalStatus: 'declined' };
+        }
+        handleTriggerReroute(payload.reason);
+      }
+    };
+
+    const onRerouted = (payload) => {
+      const currentTrip = tripRef.current;
+      if (currentTrip && String(currentTrip._id) === String(payload.tripId)) {
+        setRerouteNotice(payload.rerouteReason || `Rerouted to ${payload.newHospital?.name}`);
+        setTimeout(() => setRerouteNotice(''), 8000);
       }
     };
 
@@ -678,6 +933,8 @@ export default function Driver() {
       setCall(null);
       setTrip(null);
       setAmbulance(null);
+      setShowIntakeModal(false);
+      setRerouteNotice('');
       localStorage.removeItem('driverSession');
       setShowVehicleSelect(true);
       syncFleetAndActiveCalls();
@@ -686,6 +943,9 @@ export default function Driver() {
     socket.on('driver:incoming-call', onIncomingCall);
     socket.on('dispatch:created', onIncomingCall);
     socket.on('trip:updated', onTripUpdated);
+    socket.on('trip:hospital-response', onHospitalResponse);
+    socket.on('trip:hospital-declined', onHospitalDeclined);
+    socket.on('trip:rerouted', onRerouted);
     socket.on('ambulance:updated', onAmbulanceUpdated);
     socket.on('demo:reset', onDemoReset);
     socket.on('ambulances:reset', onDemoReset);
@@ -694,13 +954,15 @@ export default function Driver() {
       socket.off('driver:incoming-call', onIncomingCall);
       socket.off('dispatch:created', onIncomingCall);
       socket.off('trip:updated', onTripUpdated);
+      socket.off('trip:hospital-response', onHospitalResponse);
+      socket.off('trip:hospital-declined', onHospitalDeclined);
+      socket.off('trip:rerouted', onRerouted);
       socket.off('ambulance:updated', onAmbulanceUpdated);
       socket.off('demo:reset', onDemoReset);
       socket.off('ambulances:reset', onDemoReset);
     };
-  }, [syncFleetAndActiveCalls]);
+  }, [syncFleetAndActiveCalls, trip, handleTriggerReroute]);
 
-  // When ambulance changes, join its socket room
   useEffect(() => {
     if (!ambulance?._id) return;
     socket.emit('driver:join', ambulance._id);
@@ -719,6 +981,13 @@ export default function Driver() {
       body: JSON.stringify({ status }),
     });
     setTrip(updated);
+  };
+
+  // Hospital chosen handler: immediately loads route and opens intake modal
+  const handleHospitalChosen = (updatedTrip) => {
+    setTrip(updatedTrip);
+    // Show clinical intake form to paramedic after selection
+    setShowIntakeModal(true);
   };
 
   const activeTrip =
@@ -752,6 +1021,38 @@ export default function Driver() {
         }}
       />
 
+      {/* Reroute Alert Toast */}
+      {rerouteNotice && (
+        <div
+          style={{
+            background: '#fff7ed',
+            border: '2px solid #ea580c',
+            borderRadius: '10px',
+            padding: '12px 18px',
+            marginBottom: '16px',
+            color: '#9a3412',
+            fontWeight: 700,
+            fontSize: '0.92rem',
+            boxShadow: '0 4px 12px rgba(234, 88, 12, 0.15)',
+          }}
+        >
+          {rerouteNotice}
+        </div>
+      )}
+
+      {/* Clinical Intake Modal */}
+      {showIntakeModal && trip && (
+        <ClinicalIntakeModal
+          trip={trip}
+          route={trip.leg2Route}
+          onSubmitSuccess={(updatedTrip) => {
+            setTrip(updatedTrip);
+            setShowIntakeModal(false);
+          }}
+          onClose={() => setShowIntakeModal(false)}
+        />
+      )}
+
       {/* Vehicle selection screen */}
       {showVehicleSelect ? (
         <VehicleSelectScreen
@@ -784,7 +1085,7 @@ export default function Driver() {
               <div style={{ textAlign: 'right' }}>
                 <div style={{
                   fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
-                  color: status === 'waiting' ? '#64748b' : '#1359bd'
+                  color: status === 'waiting' ? '#64748b' : '#1359bd',
                 }}>
                   {status === 'waiting' ? 'STANDBY' : status.replace(/_/g, ' ').toUpperCase()}
                 </div>
@@ -861,12 +1162,17 @@ export default function Driver() {
 
           {/* AT ACCIDENT: HOSPITAL SELECTION */}
           {status === 'at_accident' && (
-            <HospitalSelect trip={activeTrip} onChosen={setTrip} />
+            <HospitalSelect trip={activeTrip} onChosen={handleHospitalChosen} />
           )}
 
           {/* HOSPITAL SELECTED: LEG 2 ROUTE */}
           {status === 'hospital_selected' && activeTrip.hospital && (
             <section className="incoming">
+              <ParallelHospitalStatusCard
+                trip={activeTrip}
+                onOpenIntake={() => setShowIntakeModal(true)}
+                onTimeoutTriggered={() => handleTriggerReroute('Hospital response timed out')}
+              />
               <p style={{ fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.08em' }}>LEG 2 — ROUTE TO HOSPITAL</p>
               <h2>Route to {activeTrip.hospital.name}</h2>
               <RoutePicker
@@ -878,7 +1184,13 @@ export default function Driver() {
                   origin: `Accident (${activeTrip.accident.lat.toFixed(4)}, ${activeTrip.accident.lng.toFixed(4)})`,
                   destination: activeTrip.hospital.name,
                 }}
-                onChosen={setTrip}
+                onChosen={(t) => {
+                  setTrip(t);
+                  // Ensure clinical intake modal opens if not already submitted
+                  if (!t.clinicalIntake) {
+                    setShowIntakeModal(true);
+                  }
+                }}
               />
             </section>
           )}
@@ -886,13 +1198,22 @@ export default function Driver() {
           {/* LEG 2: EN ROUTE TO HOSPITAL */}
           {status === 'en_route_to_hospital' && activeTrip.leg2Route && (
             <section className="incoming">
+              <ParallelHospitalStatusCard
+                trip={activeTrip}
+                onOpenIntake={() => setShowIntakeModal(true)}
+                onTimeoutTriggered={() => handleTriggerReroute('Hospital response timed out')}
+              />
+
               <p style={{ fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.08em' }}>EN ROUTE TO HOSPITAL</p>
               <h2>Transporting to {activeTrip.hospital?.name}</h2>
+
               <ArrivalCountdown
+                key={`${activeTrip.hospital?.hospitalId || activeTrip.hospital?.name || 'leg2'}_${activeTrip.attemptCount || 1}`}
                 route={activeTrip.leg2Route}
                 nextStatus="completed"
+                onPositionUpdate={(pos) => setInterpolatedPos(pos)}
                 onArrived={arrive}
-                buttonLabel="Arrived at Hospital — Patient Handed Off"
+                buttonLabel={`Arrived at ${activeTrip.hospital?.name || 'Hospital'} — Patient Handed Off`}
               />
             </section>
           )}
@@ -903,7 +1224,7 @@ export default function Driver() {
               <p style={{ color: '#16a34a', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.08em' }}>TRIP COMPLETED</p>
               <h2>Patient Handed Off</h2>
               <p style={{ color: '#516174' }}>
-                Patient delivered to <b>{activeTrip.hospital?.name || 'hospital'}</b>. Returning to standby.
+                Patient delivered to <b>{activeTrip.hospital?.name || trip?.hospital?.name || 'hospital'}</b>. Returning to standby.
               </p>
               <button
                 className="button"

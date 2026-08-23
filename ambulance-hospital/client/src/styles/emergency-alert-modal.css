@@ -1,165 +1,75 @@
-/* Emergency Alert Modal Styling */
+/* Emergency Alert Modal - High Visibility & Responsive Theme */
 .emergency-modal .modal-content {
-  background: rgba(13, 17, 23, 0.85);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(78, 115, 223, 0.3);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2) !important;
+  overflow: hidden !important;
 }
 
 .emergency-modal .modal-header {
-  background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-  color: white;
-  border-bottom: none;
-  border-radius: 12px 12px 0 0;
-  padding: 1.25rem;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 1rem 1.5rem !important;
 }
 
 .emergency-modal .modal-title {
-  display: flex;
-  align-items: center;
-  font-weight: 700;
-  font-size: 1.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.emergency-modal .modal-title svg {
-  font-size: 1.75rem;
-  margin-right: 0.75rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  font-size: 1.25rem !important;
 }
 
 .emergency-modal .modal-body {
-  padding: 1.5rem;
-  color: #e2e8f0;
-}
-
-.emergency-alert-content {
-  background: rgba(26, 32, 44, 0.6);
-  border-radius: 8px;
-  padding: 1.5rem;
-  border-left: 4px solid #4e73df;
-}
-
-.emergency-alert-content h4 {
-  color: #ffffff;
-  font-weight: 700;
-  margin-bottom: 1.25rem;
-  font-size: 1.5rem;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: center;
-}
-
-.emergency-alert-content h4::before {
-  content: '';
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  background-color: #e74a3b;
-  border-radius: 50%;
-  margin-right: 10px;
-  box-shadow: 0 0 8px rgba(231, 74, 59, 0.8);
-  animation: pulse 2s infinite;
-}
-
-.emergency-alert-content .info-row {
-  display: flex;
-  margin-bottom: 1rem;
-  align-items: center;
-}
-
-.emergency-alert-content .info-label {
-  font-weight: 600;
-  color: #a0aec0;
-  width: 140px;
-  flex-shrink: 0;
-}
-
-.emergency-alert-content .info-value {
-  color: #ffffff;
-  flex-grow: 1;
-}
-
-.emergency-alert-content .badge-severity {
-  font-size: 0.85rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 30px;
-  font-weight: 600;
-}
-
-.emergency-alert-content .badge-severity.medium {
-  background-color: #f6ad55;
-  color: #744210;
-}
-
-.emergency-alert-content .badge-severity.high {
-  background-color: #fc8181;
-  color: #742a2a;
-}
-
-.emergency-alert-content .badge-severity.low {
-  background-color: #68d391;
-  color: #22543d;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  padding: 1.5rem !important;
 }
 
 .emergency-modal .modal-footer {
-  border-top: none;
-  padding: 1rem 1.5rem 1.5rem;
-  justify-content: space-between;
+  background: #f8fafc !important;
+  border-top: 1px solid #e2e8f0 !important;
+  padding: 1rem 1.5rem !important;
 }
 
-.emergency-modal .btn-close {
-  background-color: rgba(160, 174, 192, 0.2);
-  color: #e2e8f0;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.2s;
+/* Text Visibility Overrides */
+.emergency-modal p,
+.emergency-modal div,
+.emergency-modal span:not(.badge),
+.emergency-modal strong {
+  color: inherit;
 }
 
-.emergency-modal .btn-close:hover {
-  background-color: rgba(160, 174, 192, 0.3);
+.emergency-modal .text-muted {
+  color: #475569 !important;
 }
 
-.emergency-modal .btn-details {
-  background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  box-shadow: 0 4px 6px rgba(78, 115, 223, 0.25);
-  transition: all 0.2s;
+.emergency-modal .text-dark {
+  color: #0f172a !important;
 }
 
-.emergency-modal .btn-details:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 8px rgba(78, 115, 223, 0.3);
+.emergency-modal .text-primary {
+  color: #4f46e5 !important;
 }
 
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(231, 74, 59, 0.7);
+.emergency-modal .text-danger {
+  color: #dc2626 !important;
+}
+
+/* Responsive Grid inside Modal */
+@media (max-width: 576px) {
+  .emergency-modal .modal-dialog {
+    margin: 0.5rem;
   }
-  70% {
-    box-shadow: 0 0 0 10px rgba(231, 74, 59, 0);
+  .emergency-modal .modal-body {
+    padding: 1rem !important;
   }
-  100% {
-    box-shadow: 0 0 0 0 rgba(231, 74, 59, 0);
+  .emergency-modal .modal-footer {
+    flex-direction: column;
+    gap: 8px;
   }
-}
-
-.emergency-modal .time-display {
-  font-family: 'Courier New', monospace;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-.emergency-modal .message-box {
-  background: rgba(45, 55, 72, 0.5);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-top: 1rem;
-  border-left: 3px solid #a0aec0;
+  .emergency-modal .modal-footer > * {
+    width: 100%;
+  }
 }

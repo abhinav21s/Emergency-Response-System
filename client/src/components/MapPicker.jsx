@@ -5,13 +5,16 @@ import L from 'leaflet';
 export const BENGALURU = [12.9716, 77.5946];
 
 const icon = (ambulance, isAllocated) => {
-  const color = ambulance.status === 'available' ? (ambulance.type === 'public' ? '#0b6cf0' : '#7c3aed') : '#64748b';
-  const tag = ambulance.type === 'public' ? 'PUBLIC 108' : 'PRIVATE';
+  const color = ambulance.status === 'available' ? (ambulance.type === 'public' ? '#1d4ed8' : '#6d28d9') : '#475569';
+  const tag = ambulance.type === 'public' ? '108 PUBLIC' : 'PRIVATE';
   return L.divIcon({
     className: `ambulance-icon${isAllocated ? ' allocated-marker' : ''}`,
-    html: `<span style="background:${color}"><b>🚑</b><em>${tag}</em></span>`,
-    iconSize: [72, 45],
-    iconAnchor: [36, 23]
+    html: `<div class="ambulance-pill" style="background:${color};">
+      <span class="amb-symbol">🚑</span>
+      <span class="amb-tag">${tag}</span>
+    </div>`,
+    iconSize: [96, 32],
+    iconAnchor: [48, 16],
   });
 };
 

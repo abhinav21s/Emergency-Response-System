@@ -110,6 +110,23 @@ const EmergencyRequests = () => {
       setSuccess(`Emergency status updated to ${newStatus}`);
       setTimeout(() => setSuccess(''), 4000);
       
+      // Forward to Port 5000 dispatch engine
+      const outcome = newStatus === 'Accepted' ? 'confirmed' : 'declined';
+      const targetReq = emergencies.find(e => e._id === emergencyId);
+      const payload = {
+        tripId: targetReq?.tripId || emergencyId,
+        outcome,
+        hospitalId: user?._id,
+        reason: newStatus === 'Accepted' ? 'Accepted by hospital team' : 'Declined by hospital team',
+      };
+
+      api.post('/bridge/hospital-response', payload).catch(() => {});
+      fetch('http://localhost:5000/api/hospital-response', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }).catch(() => {});
+
       if (socket) {
         socket.emit('hospital:response', {
           emergencyId,
@@ -151,8 +168,12 @@ const EmergencyRequests = () => {
       <Container className="mt-4 emergency-requests" style={{ maxWidth: '1180px' }}>
         <Row className="mb-4">
           <Col>
-            <h2>Emergency Requests</h2>
-            <p className="text-muted">Manage and respond to live 108 ambulance inbound requests</p>
+            <h2 style={{ color: '#0f2942', fontWeight: 800, fontSize: '2rem', letterSpacing: '-0.02em' }}>
+              Emergency Inbound Requests
+            </h2>
+            <p style={{ color: '#334e68', fontSize: '1rem', fontWeight: 600 }}>
+              Manage and respond to live 108 ambulance inbound requests in real time
+            </p>
           </Col>
         </Row>
         
@@ -169,74 +190,84 @@ const EmergencyRequests = () => {
         )}
         
         {emergencies.length === 0 ? (
-          <Card className="shadow-sm border-0">
+          <Card className="shadow-sm border-0" style={{ background: '#f5f8fc', border: '1.5px solid #cbd5e1', borderRadius: '14px' }}>
             <Card.Body className="text-center py-5">
-              <FaAmbulance size={50} className="text-muted mb-3" />
-              <h4>No Emergency Requests</h4>
-              <p className="text-muted">
-                No active ambulance arrivals at this time.
+              <FaAmbulance size={50} style={{ color: '#1e56a0', marginBottom: '16px' }} />
+              <h4 style={{ color: '#0f2942', fontWeight: 800 }}>No Active Emergency Requests</h4>
+              <p style={{ color: '#334e68', fontWeight: 600 }}>
+                No active ambulance arrivals at this time. New dispatches will notify here automatically.
               </p>
             </Card.Body>
           </Card>
         ) : (
           emergencies.map((emergency) => (
-            <Card key={emergency._id || Math.random()} className="mb-4 shadow-sm border-0" style={{ borderRadius: '12px', overflow: 'hidden' }}>
-              <Card.Header className="d-flex justify-content-between align-items-center bg-white p-3 border-bottom">
-                <h5 className="mb-0 fw-bold" style={{ color: '#0f172a' }}>
-                  <FaAmbulance className="me-2 text-danger" />
-                  {emergency.emergencyType || '108 Ambulance Arrival'}
+            <Card key={emergency._id || Math.random()} className="mb-4 shadow-sm border-0" style={{ borderRadius: '14px', border: '1.5px solid #cbd5e1', overflow: 'hidden', background: '#f5f8fc' }}>
+              <Card.Header className="d-flex justify-content-between align-items-center p-3 border-bottom" style={{ background: '#ffffff', borderBottomColor: '#cbd5e1' }}>
+                <h5 className="mb-0 fw-bold d-flex align-items-center gap-2" style={{ color: '#0f2942', fontWeight: 800 }}>
+                  <FaAmbulance className="text-danger" style={{ fontSize: '1.25rem' }} />
+                  {emergency.emergencyType || '108 Ambulance Inbound'}
                 </h5>
-                <Badge bg={getStatusBadgeColor(emergency.status)} style={{ fontSize: '0.85rem', padding: '6px 12px' }}>
+                <Badge bg={getStatusBadgeColor(emergency.status)} style={{ fontSize: '0.88rem', padding: '6px 14px', borderRadius: '20px', fontWeight: 800 }}>
                   {emergency.status || 'Requested'}
                 </Badge>
               </Card.Header>
-              <Card.Body className="p-4">
+              <Card.Body className="p-4" style={{ background: '#ffffff' }}>
                 <Row className="g-4">
                   <Col md={8}>
                     <Row className="g-3">
                       <Col md={6}>
                         <div className="mb-3">
-                          <h6 className="fw-bold text-muted small text-uppercase">Ambulance Details</h6>
-                          <p className="mb-1">
-                            <strong>Unit / Driver:</strong> {emergency.driverName || emergency.ambulanceDetails?.name || '108 Operator'}
+                          <h6 style={{ color: '#1e56a0', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Ambulance Details
+                          </h6>
+                          <p className="mb-1" style={{ color: '#1e3a5f', fontSize: '0.92rem' }}>
+                            <strong style={{ color: '#0f2942' }}>Unit / Driver:</strong> {emergency.driverName || emergency.ambulanceDetails?.name || '108 Unit'}
                           </p>
-                          <p className="mb-0">
-                            <strong>Vehicle:</strong> {emergency.vehicleNumber || emergency.ambulanceDetails?.vehicleNumber || '108 Ambulance'}
+                          <p className="mb-0" style={{ color: '#1e3a5f', fontSize: '0.92rem' }}>
+                            <strong style={{ color: '#0f2942' }}>Vehicle:</strong> {emergency.vehicleNumber || emergency.ambulanceDetails?.vehicleNumber || 'KA-01-EA-108'}
                           </p>
                         </div>
                         
                         <div>
-                          <h6 className="fw-bold text-muted small text-uppercase">Patient Information</h6>
-                          <p className="mb-1">
-                            <strong>Condition:</strong> {emergency.patient?.condition || 'Critical Trauma'}
+                          <h6 style={{ color: '#1e56a0', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Patient Information
+                          </h6>
+                          <p className="mb-1" style={{ color: '#1e3a5f', fontSize: '0.92rem' }}>
+                            <strong style={{ color: '#0f2942' }}>Condition:</strong> {emergency.patient?.condition || 'Emergency Inbound'}
                           </p>
-                          <p className="mb-0">
-                            <strong>Severity:</strong> <Badge bg={emergency.severity === 'High' ? 'danger' : 'warning'}>{emergency.severity || 'High'}</Badge>
+                          <p className="mb-0" style={{ color: '#1e3a5f', fontSize: '0.92rem' }}>
+                            <strong style={{ color: '#0f2942' }}>Severity:</strong> <Badge bg={emergency.severity === 'High' ? 'danger' : 'warning'} style={{ fontWeight: 800 }}>{emergency.severity || 'High'}</Badge>
                           </p>
                         </div>
                       </Col>
                       
                       <Col md={6}>
                         <div className="mb-3">
-                          <h6 className="fw-bold text-muted small text-uppercase">Inbound Notes</h6>
-                          <p className="mb-0 text-dark">
-                            {emergency.notes || 'Emergency dispatch en route to hospital.'}
+                          <h6 style={{ color: '#1e56a0', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Inbound Notes
+                          </h6>
+                          <p className="mb-0" style={{ color: '#0f2942', fontWeight: 600, fontSize: '0.92rem', background: '#f5f8fc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                            {emergency.notes || 'Emergency dispatch en route to hospital trauma bay.'}
                           </p>
                         </div>
                         
                         <div>
-                          <h6 className="fw-bold text-muted small text-uppercase">Dispatched At</h6>
-                          <p className="mb-0 text-muted">
-                            {emergency.createdAt ? new Date(emergency.createdAt).toLocaleString() : 'Just now'}
+                          <h6 style={{ color: '#1e56a0', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Dispatched At
+                          </h6>
+                          <p className="mb-0" style={{ color: '#334e68', fontWeight: 600, fontSize: '0.88rem' }}>
+                            {emergency.createdAt ? new Date(emergency.createdAt).toLocaleString() : 'Live Inbound'}
                           </p>
                         </div>
                       </Col>
                     </Row>
                   </Col>
                   
-                  <Col md={4} className="border-start">
+                  <Col md={4} className="border-start" style={{ borderLeftColor: '#cbd5e1' }}>
                     <div className="d-flex flex-column justify-content-center h-100">
-                      <h6 className="fw-bold text-muted small text-uppercase mb-3">Hospital Action</h6>
+                      <h6 style={{ color: '#1e56a0', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '14px' }}>
+                        Hospital Action
+                      </h6>
                       
                       {emergency.status === 'Requested' && (
                         <div className="d-grid gap-2">
@@ -245,29 +276,32 @@ const EmergencyRequests = () => {
                             onClick={() => updateEmergencyStatus(emergency._id, 'Accepted')}
                             size="lg"
                             className="py-2 fw-bold"
+                            style={{ background: '#0f766e', borderColor: '#0d655e', borderRadius: '10px', boxShadow: '0 4px 12px rgba(15,118,110,0.25)' }}
                           >
-                            Accept Inbound
+                            Accept Inbound & Prepare Bay
                           </Button>
                           <Button 
                             variant="outline-danger" 
                             onClick={() => updateEmergencyStatus(emergency._id, 'Cancelled')}
                             size="sm"
+                            style={{ borderRadius: '8px', fontWeight: 700 }}
                           >
-                            Decline
+                            Decline (Reroute)
                           </Button>
                         </div>
                       )}
                       
                       {(emergency.status === 'Accepted' || emergency.status === 'En Route' || emergency.status === 'Arrived') && (
                         <div className="d-grid gap-2">
-                          <p className="text-success small mb-2 fw-bold">
-                            Inbound accepted. ER team standby.
-                          </p>
+                          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '8px 12px', borderRadius: '8px', color: '#166534', fontWeight: 700, fontSize: '0.85rem' }}>
+                            Inbound accepted. Trauma team is on standby.
+                          </div>
                           <Button 
                             variant="primary" 
                             onClick={() => updateEmergencyStatus(emergency._id, 'Completed')}
                             size="lg"
                             className="py-2 fw-bold"
+                            style={{ background: '#1e56a0', borderColor: '#163172', borderRadius: '10px', boxShadow: '0 4px 12px rgba(30,86,160,0.25)' }}
                           >
                             Complete & Admit Patient
                           </Button>
@@ -275,8 +309,8 @@ const EmergencyRequests = () => {
                       )}
                       
                       {(emergency.status === 'Completed' || emergency.status === 'Cancelled') && (
-                        <div className="p-3 text-center" style={{ background: '#f8fafc', borderRadius: '8px' }}>
-                          <span className={`fw-bold text-${emergency.status === 'Completed' ? 'success' : 'danger'}`}>
+                        <div className="p-3 text-center" style={{ background: '#f5f8fc', border: '1px solid #cbd5e1', borderRadius: '10px' }}>
+                          <span className={`fw-bold text-${emergency.status === 'Completed' ? 'success' : 'danger'}`} style={{ fontSize: '0.92rem' }}>
                             {emergency.status === 'Completed' ? 'Patient Handed Off & Admitted' : 'Arrival Cancelled'}
                           </span>
                         </div>

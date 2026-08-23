@@ -1,195 +1,170 @@
 import React, { useContext } from 'react';
-import { Navbar, Nav, Container, Button, Dropdown } from 'react-bootstrap';
+import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaAmbulance, FaHospital, FaUserMd, FaSignOutAlt, FaUserCircle, FaBell, FaTachometerAlt, FaCog } from 'react-icons/fa';
+import { FaHospital, FaSignInAlt, FaUserPlus, FaTachometerAlt, FaSignOutAlt } from 'react-icons/fa';
 import { AuthContext } from '../../context/AuthContext';
 
 const Header = () => {
-  const authContext = useContext(AuthContext);
+  const { isAuthenticated, user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
-  
-  const { isAuthenticated, user, logout, loading } = authContext;
-  
-  const onLogout = () => {
+
+  const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/hospital/login');
   };
-  
-  const authLinks = (
-    <>
-      <Nav className="ms-auto">
-        <Dropdown align="end">
-          <Dropdown.Toggle as={Button} variant="link" className="designlab-user-dropdown">
-            <div className="d-flex align-items-center">
-              <div className="designlab-feature-icon me-2" style={{ width: '36px', height: '36px', marginBottom: 0 }}>
-                <FaUserCircle size={18} />
-              </div>
-              <span className="d-none d-md-inline">{user?.username || 'User'}</span>
-            </div>
-          </Dropdown.Toggle>
-          <Dropdown.Menu className="designlab-dropdown-menu">
-            <Dropdown.Item as={Link} to="/profile" className="designlab-dropdown-item">
-              <div className="d-flex align-items-center">
-                <div className="designlab-feature-icon me-2" style={{ 
-                  width: '28px', 
-                  height: '28px', 
-                  marginBottom: 0, 
-                  background: 'var(--designlab-gradient-blue-purple)' 
-                }}>
-                  <FaUserCircle size={14} color="white" />
-                </div>
-                <span>Profile</span>
-              </div>
-            </Dropdown.Item>
-            <Dropdown.Item as={Link} to={`/${user?.role}/dashboard`} className="designlab-dropdown-item">
-              <div className="d-flex align-items-center">
-                <div className="designlab-feature-icon me-2" style={{ 
-                  width: '28px', 
-                  height: '28px', 
-                  marginBottom: 0, 
-                  background: 'var(--designlab-gradient-purple-pink)' 
-                }}>
-                  <FaTachometerAlt size={14} color="white" />
-                </div>
-                <span>Dashboard</span>
-              </div>
-            </Dropdown.Item>
-            <Dropdown.Item as={Link} to="/settings" className="designlab-dropdown-item">
-              <div className="d-flex align-items-center">
-                <div className="designlab-feature-icon me-2" style={{ 
-                  width: '28px', 
-                  height: '28px', 
-                  marginBottom: 0, 
-                  background: 'var(--designlab-gradient-blue-teal)' 
-                }}>
-                  <FaCog size={14} color="white" />
-                </div>
-                <span>Settings</span>
-              </div>
-            </Dropdown.Item>
-            <Dropdown.Divider />
-            <Dropdown.Item onClick={onLogout} className="designlab-dropdown-item">
-              <div className="d-flex align-items-center">
-                <div className="designlab-feature-icon me-2" style={{ 
-                  width: '28px', 
-                  height: '28px', 
-                  marginBottom: 0, 
-                  background: 'var(--designlab-gradient-pink-orange)' 
-                }}>
-                  <FaSignOutAlt size={14} color="white" />
-                </div>
-                <span>Logout</span>
-              </div>
-            </Dropdown.Item>
-          </Dropdown.Menu>
-        </Dropdown>
-      </Nav>
-    </>
-  );
-  
-  const guestLinks = (
-    <>
-      <Nav className="ms-auto">
-        {/* Register button removed as requested */}
-      </Nav>
-    </>
-  );
-  
+
   return (
-    <Navbar expand="lg" className="designlab-navbar" variant="dark">
+    <Navbar
+      expand="lg"
+      style={{
+        background: '#0f2942',
+        borderBottom: '2px solid #1e3a5f',
+        padding: '0.85rem 0',
+        boxShadow: '0 4px 14px rgba(15, 41, 66, 0.25)',
+      }}
+    >
       <Container>
-        <Navbar.Brand as={Link} to="/">
-          <div className="d-flex align-items-center">
-            <div className="designlab-feature-icon me-2" style={{ width: '40px', height: '40px', marginBottom: 0 }}>
-              <FaAmbulance size={20} />
-            </div>
-            <div>
-              <span className="designlab-gradient-text fw-bold">Justice</span>
-              <span className="opacity-75"> Emergency</span>
-            </div>
-          </div>
+        <Navbar.Brand
+          as={Link}
+          to="/"
+          style={{
+            color: '#ffffff',
+            fontWeight: 800,
+            fontSize: '1.25rem',
+            letterSpacing: '-0.02em',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            textDecoration: 'none',
+          }}
+        >
+          <span
+            style={{
+              background: '#1e56a0',
+              color: '#ffffff',
+              padding: '6px 10px',
+              borderRadius: '8px',
+              display: 'inline-flex',
+              alignItems: 'center',
+            }}
+          >
+            <FaHospital style={{ fontSize: '1.15rem' }} />
+          </span>
+          <span>Emergency Response Network</span>
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="me-auto">
-            <Nav.Link as={Link} to="/" className="d-flex align-items-center">
-              <div className="designlab-feature-icon me-2" style={{ 
-                width: '28px', 
-                height: '28px', 
-                marginBottom: 0, 
-                background: 'rgba(255, 255, 255, 0.05)' 
-              }}>
-                <FaAmbulance size={14} />
-              </div>
-              <span>Home</span>
-            </Nav.Link>
-            
-            <Nav.Link 
-              as="a" 
-              href="/hospital/login" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="d-flex align-items-center"
+
+        <Navbar.Toggle
+          aria-controls="public-header-nav"
+          style={{
+            borderColor: '#334e68',
+            backgroundColor: '#1e3a5f',
+            padding: '6px 10px',
+            borderRadius: '8px',
+          }}
+        />
+
+        <Navbar.Collapse id="public-header-nav">
+          <Nav className="me-auto mt-2 mt-lg-0">
+            <Nav.Link
+              as={Link}
+              to="/"
+              style={{
+                color: '#e2e8f0',
+                fontWeight: 600,
+                fontSize: '0.92rem',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+              }}
             >
-              <div className="designlab-feature-icon me-2" style={{ 
-                width: '28px', 
-                height: '28px', 
-                marginBottom: 0, 
-                background: 'rgba(255, 255, 255, 0.05)' 
-              }}>
-                <FaHospital size={14} />
-              </div>
-              <span>Hospital</span>
+              Home
             </Nav.Link>
-            
+            <Nav.Link
+              as="a"
+              href="http://localhost:5173"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: '#e2e8f0',
+                fontWeight: 600,
+                fontSize: '0.92rem',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+              }}
+            >
+              108 Dispatch Command
+            </Nav.Link>
+          </Nav>
 
-
-            {isAuthenticated && !loading && (
+          <Nav className="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+            {isAuthenticated ? (
               <>
-                <Nav.Link as={Link} to={`/${user?.role}/dashboard`} className="d-flex align-items-center">
-                  <div className="designlab-feature-icon me-2" style={{ 
-                    width: '28px', 
-                    height: '28px', 
-                    marginBottom: 0, 
-                    background: 'rgba(255, 255, 255, 0.05)' 
-                  }}>
-                    {user?.role === 'hospital' ? (
-                      <FaHospital size={14} />
-                    ) : (
-                      <FaAmbulance size={14} />
-                    )}
-                  </div>
-                  <span>Dashboard</span>
-                </Nav.Link>
-                {user?.role === 'hospital' && (
-                  <Nav.Link as={Link} to="/hospital/doctors" className="d-flex align-items-center">
-                    <div className="designlab-feature-icon me-2" style={{ 
-                      width: '28px', 
-                      height: '28px', 
-                      marginBottom: 0, 
-                      background: 'rgba(255, 255, 255, 0.05)' 
-                    }}>
-                      <FaUserMd size={14} />
-                    </div>
-                    <span>Doctors</span>
-                  </Nav.Link>
-                )}
-                <Nav.Link as={Link} to={`/${user?.role}/notifications`} className="d-flex align-items-center">
-                  <div className="designlab-feature-icon me-2" style={{ 
-                    width: '28px', 
-                    height: '28px', 
-                    marginBottom: 0, 
-                    background: 'rgba(255, 255, 255, 0.05)' 
-                  }}>
-                    <FaBell size={14} />
-                  </div>
-                  <span>Notifications</span>
-                </Nav.Link>
+                <Button
+                  as={Link}
+                  to="/hospital/dashboard"
+                  style={{
+                    background: '#1e56a0',
+                    borderColor: '#163172',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '0.88rem',
+                    borderRadius: '8px',
+                    padding: '7px 16px',
+                  }}
+                >
+                  <FaTachometerAlt className="me-2" /> Dashboard
+                </Button>
+                <Button
+                  variant="outline-danger"
+                  onClick={handleLogout}
+                  style={{
+                    color: '#f87171',
+                    borderColor: '#ef4444',
+                    fontWeight: 700,
+                    fontSize: '0.88rem',
+                    borderRadius: '8px',
+                    padding: '7px 14px',
+                  }}
+                >
+                  <FaSignOutAlt className="me-1" /> Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  as={Link}
+                  to="/hospital/login"
+                  style={{
+                    background: '#1e56a0',
+                    borderColor: '#163172',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    borderRadius: '8px',
+                    padding: '8px 18px',
+                    boxShadow: '0 2px 8px rgba(30, 86, 160, 0.3)',
+                  }}
+                >
+                  <FaSignInAlt className="me-2" /> Hospital Login
+                </Button>
+                <Button
+                  as={Link}
+                  to="/hospital/register"
+                  style={{
+                    background: '#0f766e',
+                    borderColor: '#0d655e',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    borderRadius: '8px',
+                    padding: '8px 18px',
+                    boxShadow: '0 2px 8px rgba(15, 118, 110, 0.3)',
+                  }}
+                >
+                  <FaUserPlus className="me-2" /> Register Hospital
+                </Button>
               </>
             )}
           </Nav>
-          
-          {!loading && (isAuthenticated ? authLinks : guestLinks)}
         </Navbar.Collapse>
       </Container>
     </Navbar>

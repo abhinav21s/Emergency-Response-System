@@ -172,13 +172,14 @@ const HospitalDashboard = () => {
       );
 
       // Sync back to Port 5000 dispatch engine
-      const outcome = newStatus === 'Accepted' ? 'confirmed' : 'declined';
-      const targetReq = emergencyRequests.find(e => e._id === emergencyId);
+      const isAcceptOrComplete = newStatus === 'Accepted' || newStatus === 'Completed' || newStatus === 'En Route' || newStatus === 'Arrived';
+      const outcome = isAcceptOrComplete ? 'confirmed' : 'declined';
+      const targetReq = emergencyRequests.find(e => e._id === emergencyId || e.tripId === emergencyId);
       const payload = {
-        tripId: targetReq?.tripId || emergencyId,
+        tripId: targetReq?.tripId || targetReq?._id || emergencyId,
         outcome,
         hospitalId: user?._id,
-        reason: newStatus === 'Accepted' ? 'Accepted by hospital dashboard' : 'Declined by hospital dashboard',
+        reason: isAcceptOrComplete ? 'Accepted by hospital dashboard' : 'Declined by hospital dashboard',
       };
 
       api.post('/bridge/hospital-response', payload).catch(() => {});

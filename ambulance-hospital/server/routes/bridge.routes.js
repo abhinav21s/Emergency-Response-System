@@ -171,7 +171,7 @@ router.post('/hospital-response', async (req, res) => {
       await fetch(`http://localhost:5000/api/trips/${targetTripId}/hospital-response`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ outcome, hospitalId, reason }),
+        body: JSON.stringify({ outcome, hospitalId, reason, tripId: targetTripId }),
       });
     } catch (bridgeErr) {
       console.warn('[Bridge] Could not callback to Port 5000 trip response:', bridgeErr.message);

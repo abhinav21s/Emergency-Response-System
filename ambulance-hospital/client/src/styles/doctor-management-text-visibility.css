@@ -1,69 +1,126 @@
-/* Doctor Management Text Visibility Enhancement - Colors Only */
+/* Doctor Management - High Contrast Slate Light Theme */
+
+/* Page Container */
+.doctor-management-container {
+  color: #0f2942 !important;
+}
 
 /* Page title */
 .doctor-management-container h2 {
-  color: #ffffff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  color: #0f2942 !important;
+  font-weight: 800 !important;
+  font-size: 2rem !important;
+  letter-spacing: -0.02em !important;
 }
 
 /* Subtitle text */
-.doctor-management-container p.text-muted {
-  color: #d1d5db !important;
+.doctor-management-container p.text-muted,
+.doctor-management-container .text-muted {
+  color: #334e68 !important;
+  font-weight: 600 !important;
 }
 
-/* No doctors message */
-.doctor-management-container h4 {
-  color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+/* Add Doctor Button */
+.doctor-management-container .add-doctor-btn {
+  background-color: #1e56a0 !important;
+  border-color: #163172 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  padding: 9px 20px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 12px rgba(30, 86, 160, 0.25) !important;
+}
+
+.doctor-management-container .add-doctor-btn:hover {
+  background-color: #163172 !important;
+}
+
+/* Doctor card */
+.doctor-management-container .doctor-card {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 14px rgba(15, 41, 66, 0.06) !important;
+  overflow: hidden !important;
 }
 
 /* Doctor card header */
+.doctor-management-container .doctor-card .card-header {
+  background: #f5f8fc !important;
+  border-bottom: 1.5px solid #cbd5e1 !important;
+  padding: 14px 18px !important;
+}
+
 .doctor-management-container .doctor-card .card-header h5 {
-  color: #4e73df;
-  font-weight: 600;
+  color: #0f2942 !important;
+  font-weight: 800 !important;
+  font-size: 1.15rem !important;
 }
 
 /* Doctor card body text */
+.doctor-management-container .doctor-card .card-body {
+  background: #ffffff !important;
+  padding: 18px !important;
+}
+
 .doctor-management-container .doctor-card .card-body p {
-  color: #e2e8f0;
+  color: #1e3a5f !important;
+  font-size: 0.92rem !important;
+  margin-bottom: 0.5rem !important;
 }
 
 /* Doctor card labels */
 .doctor-management-container .doctor-card .card-body strong {
-  color: #ffffff;
-  font-weight: 600;
+  color: #0f2942 !important;
+  font-weight: 800 !important;
 }
 
 /* Doctor availability toggle label */
-.doctor-management-container .availability-toggle {
-  color: #ffffff;
+.doctor-management-container .availability-toggle,
+.doctor-management-container .form-check-label {
+  color: #0f2942 !important;
+  font-weight: 700 !important;
+  font-size: 0.88rem !important;
 }
 
 /* Form labels */
 .doctor-management-container .form-label {
-  color: #ffffff;
-  font-weight: 500;
+  color: #0f2942 !important;
+  font-weight: 700 !important;
+  font-size: 0.88rem !important;
 }
 
-/* Modal titles */
-.modal-title {
-  color: #4e73df !important;
-  font-weight: 600;
+/* Action Buttons inside Card */
+.doctor-management-container .btn-outline-primary {
+  border-color: #1e56a0 !important;
+  color: #1e56a0 !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
 }
 
-/* Modal form labels */
-.modal-body .form-label {
+.doctor-management-container .btn-outline-primary:hover {
+  background-color: #1e56a0 !important;
   color: #ffffff !important;
 }
 
-/* Modal form inputs */
-.modal-body .form-control {
-  color: #ffffff;
-  background-color: rgba(30, 41, 59, 0.8);
-  border-color: rgba(99, 102, 241, 0.3);
+.doctor-management-container .btn-outline-danger {
+  border-color: #dc2626 !important;
+  color: #dc2626 !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+}
+
+.doctor-management-container .btn-outline-danger:hover {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
 }
 
 /* Emergency type badges */
 .doctor-management-container .badge {
-  color: #ffffff;
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+  border: 1px solid #bfdbfe !important;
+  font-weight: 700 !important;
+  padding: 5px 10px !important;
+  border-radius: 6px !important;
 }

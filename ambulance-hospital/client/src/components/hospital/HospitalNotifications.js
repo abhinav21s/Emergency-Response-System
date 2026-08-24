@@ -124,6 +124,7 @@ const HospitalNotifications = () => {
       if (emergencyAlert.id && emergencyAlert.id !== 'unknown') {
         await api.put(`/emergencies/${emergencyAlert.id}`, {
           status: outcome === 'confirmed' ? 'Accepted' : 'Cancelled',
+          hospitalId: user?._id,
         }).catch(() => {});
       }
 

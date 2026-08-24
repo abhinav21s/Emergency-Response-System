@@ -106,22 +106,13 @@ exports.getEmergencies = async (req, res) => {
 
     let emergencies = [];
     if (req.query.hospital) {
-      // Find emergencies strictly for this hospital, or any general inbound 108 emergencies
+      // Find emergencies strictly for this hospital
       emergencies = await Emergency.find({
-        $or: [
-          { hospital: req.query.hospital },
-          { hospital: null },
-          { hospital: { $exists: false } }
-        ],
+        hospital: req.query.hospital,
         ...filter
-      }).sort('-createdAt').limit(50);
-
-      // If still empty, return all recent emergencies for demonstration
-      if (emergencies.length === 0) {
-        emergencies = await Emergency.find().sort('-createdAt').limit(20);
-      }
+      }).sort('-updatedAt -createdAt').limit(50);
     } else {
-      emergencies = await Emergency.find(filter).sort('-createdAt').limit(50);
+      emergencies = await Emergency.find(filter).sort('-updatedAt -createdAt').limit(50);
     }
 
     const populatedEmergencies = await Promise.all(emergencies.map(async (emergency) => {
@@ -148,32 +139,50 @@ exports.getEmergencies = async (req, res) => {
 exports.updateEmergency = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, notes } = req.body;
+    const { status, notes, hospitalId } = req.body;
+
+    const targetStatus = status || 'Accepted';
+    const targetHosp = req.user?._id || hospitalId;
 
     let updatedEmergency = null;
     if (mongoose.Types.ObjectId.isValid(id)) {
       updatedEmergency = await Emergency.findByIdAndUpdate(
         id,
-        { status: status || 'Accepted', notes, updatedAt: Date.now() },
+        { status: targetStatus, ...(notes ? { notes } : {}), updatedAt: Date.now() },
         { new: true }
       );
     }
 
     if (!updatedEmergency) {
-      // Fallback: create or return mock updated emergency so frontend doesn't break
+      const query = { $or: [{ tripId: id }, { notes: new RegExp(id, 'i') }] };
+      if (targetHosp && mongoose.Types.ObjectId.isValid(targetHosp)) {
+        query.hospital = targetHosp;
+      }
+      try {
+        updatedEmergency = await Emergency.findOneAndUpdate(
+          query,
+          { status: targetStatus, ...(notes ? { notes } : {}), updatedAt: Date.now() },
+          { new: true }
+        );
+      } catch (findErr) {
+        console.warn('[Emergency Controller] Update error:', findErr.message);
+      }
+    }
+
+    if (!updatedEmergency) {
       updatedEmergency = {
         _id: id,
-        status: status || 'Accepted',
+        status: targetStatus,
         notes: notes || 'Emergency status updated',
         updatedAt: new Date()
       };
     }
 
     if (global.io) {
-      // Use a dedicated status-update event, NOT the new-emergency notification channel
       global.io.emit('hospital:emergency-status-updated', {
         emergencyId: id,
-        status: status || 'Accepted',
+        hospitalId: targetHosp,
+        status: targetStatus,
         emergency: updatedEmergency
       });
     }

@@ -91,18 +91,9 @@ const HospitalDashboard = () => {
     if (!socket || !user) return;
 
     const handleIncomingPatient = (data) => {
-      if (data) {
-        const emergencyData = data.emergency || data;
-        const newObj = {
-          _id: emergencyData._id || data.emergencyId || data.tripId || `temp-${Date.now()}`,
-          emergencyType: emergencyData.emergencyType || '108 Ambulance Arrival',
-          severity: emergencyData.severity || 'High',
-          status: emergencyData.status || 'Requested',
-          notes: emergencyData.notes || data.message || `Ambulance ${data.ambulanceName || '108'} en route. ETA: ${data.etaMinutes || 5} min.`,
-          driverName: data.driverName || 'On-duty Driver',
-          createdAt: emergencyData.createdAt || new Date().toISOString()
-        };
-        setEmergencyRequests((prev) => [newObj, ...prev.filter((e) => e._id !== newObj._id)]);
+      if (!data) return;
+      if (data.hospitalId && user._id && String(data.hospitalId) !== String(user._id)) {
+        return;
       }
       fetchEmergencyRequests();
       setSuccessNotice('New incoming emergency patient alert received!');
@@ -110,12 +101,13 @@ const HospitalDashboard = () => {
     };
 
     const handleEmergencyNotification = (data) => {
-      // For hospital:emergency-notification (new bridge emergencies), refresh the list
-      if (data && data.type === 'NEW_EMERGENCY') {
-        fetchEmergencyRequests();
-        setSuccessNotice('New emergency request received.');
-        setTimeout(() => setSuccessNotice(''), 4000);
+      if (!data || data.type !== 'NEW_EMERGENCY') return;
+      if (data.hospitalId && user._id && String(data.hospitalId) !== String(user._id)) {
+        return;
       }
+      fetchEmergencyRequests();
+      setSuccessNotice('New emergency request received.');
+      setTimeout(() => setSuccessNotice(''), 4000);
     };
 
     const handleDoctorUpdate = () => {
@@ -124,11 +116,17 @@ const HospitalDashboard = () => {
 
     // Update the local list when an emergency status changes (Accept/Complete) — no modal
     const handleStatusUpdate = (data) => {
-      if (data && data.emergencyId) {
+      if (!data) return;
+      if (data.hospitalId && user._id && String(data.hospitalId) !== String(user._id)) {
+        return;
+      }
+      const targetId = data.emergencyId || data.tripId;
+      if (targetId) {
         setEmergencyRequests((prev) =>
-          prev.map((e) => e._id === data.emergencyId ? { ...e, status: data.status } : e)
+          prev.map((e) => e._id === targetId || e.tripId === targetId ? { ...e, status: data.status } : e)
         );
       }
+      fetchEmergencyRequests();
     };
 
     const cleanupEmergency = onEvent('hospital:incoming-patient', handleIncomingPatient);

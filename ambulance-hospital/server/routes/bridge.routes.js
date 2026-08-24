@@ -53,7 +53,13 @@ router.post('/incoming-patient', async (req, res) => {
     }
 
     const hospitalName = data.hospital.name || '';
-    const targetHospital = await findHospitalByFlexibleName(hospitalName);
+    let targetHospital = null;
+    if (data.hospital.id && mongoose.Types.ObjectId.isValid(data.hospital.id)) {
+      targetHospital = await Hospital.findById(data.hospital.id);
+    }
+    if (!targetHospital && hospitalName) {
+      targetHospital = await findHospitalByFlexibleName(hospitalName);
+    }
 
     const requestId = data.requestId || `${data.tripId}_${targetHospital?._id || 'h'}_${data.attemptCount || 1}`;
 
@@ -143,26 +149,43 @@ router.post('/hospital-response', async (req, res) => {
     // Resolve true tripId if tripId was an Emergency _id
     let targetTripId = tripId;
     try {
-      const emergency = await Emergency.findById(tripId);
-      if (emergency && emergency.tripId) {
-        targetTripId = emergency.tripId;
+      if (mongoose.Types.ObjectId.isValid(tripId)) {
+        const emergency = await Emergency.findById(tripId);
+        if (emergency && emergency.tripId) {
+          targetTripId = emergency.tripId;
+        }
       }
     } catch (_) {}
 
-    // Update local emergency record status
-    try {
-      await Emergency.updateMany(
-        { $or: [{ _id: tripId }, { tripId: targetTripId }, { notes: new RegExp(targetTripId, 'i') }] },
-        { status: outcome === 'confirmed' ? 'Accepted' : 'Cancelled' }
-      );
-    } catch (_) {}
+    const resolvedStatus = outcome === 'confirmed' ? 'Accepted' : 'Cancelled';
 
-    // Emit local status update on Port 5001 so all connected tabs on Port 3000 update immediately
+    // Update local emergency record status ONLY for this specific hospital and trip
+    try {
+      if (mongoose.Types.ObjectId.isValid(tripId)) {
+        await Emergency.findByIdAndUpdate(tripId, { status: resolvedStatus, updatedAt: Date.now() });
+      }
+
+      if (targetTripId) {
+        const query = { tripId: targetTripId };
+        if (hospitalId && mongoose.Types.ObjectId.isValid(hospitalId)) {
+          query.hospital = hospitalId;
+        }
+        await Emergency.updateMany(
+          query,
+          { status: resolvedStatus, updatedAt: Date.now() }
+        );
+      }
+    } catch (updateErr) {
+      console.warn('[Bridge] Emergency update error:', updateErr.message);
+    }
+
+    // Emit local status update on Port 5001 so only the target hospital updates
     if (global.io) {
       global.io.emit('hospital:emergency-status-updated', {
         emergencyId: tripId,
         tripId: targetTripId,
-        status: outcome === 'confirmed' ? 'Accepted' : 'Cancelled',
+        hospitalId: hospitalId,
+        status: resolvedStatus,
       });
     }
 
